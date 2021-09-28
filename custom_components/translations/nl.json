@@ -1,0 +1,23 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Definieer de Degree Days (graaddagen) integratie",
+          "data": {
+            "name": "Het voorvoegsel voor de namen van de Degree Day sensoren",
+            "heating limit": "Stookgrens",
+            "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
+            "weather station": "Weerstation number (KNMI)"
+          }
+        }
+      },
+      "error": {
+        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+        "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]"
+      },
+      "abort": {
+        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      }
+    }
+  }
+  
