@@ -61,11 +61,14 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if self._weather_station_in_configuration_exists(weather_station_entry):
                 self._errors[CONF_WEATHER_STATION] = "already_configured"
             else:
-                return self.async_create_entry(title=name, data={
-                    CONF_HEATING_LIMIT: heating_limit,
-                    CONF_INDOOR_TEMP: indoor_temp,
-                    CONF_WEATHER_STATION: weather_station_entry
-                })
+                return self.async_create_entry(
+                    title=name,
+                    data={
+                        CONF_HEATING_LIMIT: heating_limit,
+                        CONF_INDOOR_TEMP: indoor_temp,
+                        CONF_WEATHER_STATION: weather_station_entry
+                    }
+                )
         else:
             user_input = {}
             user_input[CONF_NAME] = DEFAULT_NAME
@@ -73,6 +76,15 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_INDOOR_TEMP] = DEFAULT_INDOOR_TEMP
             user_input[CONF_WEATHER_STATION] = DEFAULT_WEATHER_STATION
 
+        return await self._show_config_form(user_input)
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return DegreeDaysOptionsFlowHandler(config_entry)
+
+    async def _show_config_form(self, user_input):  # pylint: disable=unused-argument
+        """Show the configuration form to edit config data."""
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -94,12 +106,47 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=self._errors,
         )
 
-    # async def async_step_import(self, user_input=None):
-    #     """Import a config entry."""
-    #     weather_station_entry = user_input.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
-    #     weather_station_entry = user_input.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
-    #     weather_station_entry = user_input.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
 
-    #     if self._weather_station_in_configuration_exists(weather_station_entry):
-    #         return self.async_abort(reason="already_configured")
-    #     return await self.async_step_user(user_input)
+class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
+    """Blueprint config flow options handler."""
+
+    def __init__(self, config_entry):
+        """Initialize options flow."""
+        self.config_entry = config_entry
+        self.options = dict(config_entry.options)
+
+    async def async_step_init(self, user_input=None):  # pylint: disable=unused-argument
+        """Manage the options."""
+        return await self.async_step_user()
+
+    async def async_step_user(self, user_input=None):
+        """Handle a flow initialized by the user."""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self._update_options()
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_NAME, default=self.options.get(CONF_NAME, DEFAULT_NAME)
+                    ): str,
+                    vol.Optional(
+                        CONF_HEATING_LIMIT, default=self.options.get(CONF_HEATING_LIMIT, DEFAULT_HEATING_LIMIT)
+                    ): cv.positive_int,
+                    vol.Optional(
+                        CONF_INDOOR_TEMP, default=self.options.get(CONF_INDOOR_TEMP, DEFAULT_INDOOR_TEMP)
+                    ): cv.positive_int,
+                    vol.Required(
+                        CONF_WEATHER_STATION, default=self.options.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
+                    ): str,
+                }
+            ),
+        )
+
+    async def _update_options(self):
+        """Update config entry options."""
+        return self.async_create_entry(
+            title=self.config_entry.data.get(CONF_NAME), data=self.options
+        )
