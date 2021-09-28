@@ -1,0 +1,7 @@
+   
+{
+  "name": "Degree-Days integration",
+  "domains": "degree_days",
+  "iot_class": "cloud pull",
+  "homeassistant": "2021.9.0"
+}
