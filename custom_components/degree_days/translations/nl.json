@@ -7,16 +7,21 @@
           "name": "Het voorvoegsel voor de namen van de Degree Day sensoren",
           "heating limit": "Stookgrens",
           "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
-          "weather station": "Weerstation number (KNMI)"
+          "weather station": "Weerstation (KNMI)",
+          "startday": "Startdag voor optelling totaal aantal graaddagen",
+          "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
+          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)"
         }
       }
     },
     "error": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]"
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_startday": "Foutieve dag (controleer dag-maand combinatie)"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "invalid_startday": "Foutieve dag (controleer dag-maand combinatie)"
     }
   },
   "options": {
@@ -27,7 +32,10 @@
           "name": "Het voorvoegsel voor de namen van de Degree Day sensoren",
           "heating limit": "Stookgrens",
           "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
-          "weather station": "Weerstation number (KNMI)"
+          "weather station": "Weerstation (KNMI)",
+          "startday": "Startdag voor optelling totaal aantal graaddagen",
+          "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
+          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)"
         }
       }
     }

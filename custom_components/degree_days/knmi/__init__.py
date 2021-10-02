@@ -1,16 +1,18 @@
 import requests
 import pandas as pd
-import numpy as np
 from io import StringIO
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
+
+from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
 
 class KNMI(object):
-    def __init__(self, heating_limit, indoor_temp, weather_station):
-        self.heating_limit = heating_limit
-        self.indoor_temp = indoor_temp
-        self.weather_station = weather_station
+    def __init__(self, startdate, station, T_indoor, T_heatinglimit, gasusage):
+        self.startdate = startdate
+        self.station = station
+        self.T_indoor = T_indoor
+        self.T_heatinglimit = T_heatinglimit
+        self.gasusage = gasusage
 
         data = self.get_degree_days()
 
@@ -18,42 +20,66 @@ class KNMI(object):
         self.total_degree_days_this_year = data["total_degree_days_this_year"]
         self.weighted_degree_days_year = data["weighted_degree_days_year"]
 
+
     def get_degree_days(self):
-        startdate = datetime.now().strftime("%Y0101")
         enddate = datetime.now().strftime("%Y%m%d")
-        stations = [self.weather_station]
+
+        station_code = STATION_MAPPING[self.station]
+        year = datetime.strptime(self.startdate, '%Y%m%d').year
+        enddate = datetime.now().strftime("%Y%m%d")
         variables = ['TG']
-        df = self.get_daily_data_df(startdate, enddate, stations, variables)
+        df = self.get_daily_data_df("20000101", enddate, [station_code], variables)
     
         df = df.rename(columns={'   TG': 'TG'})
         df['Date'] = pd.to_datetime(df['YYYYMMDD'], format='%Y%m%d')
-        year = datetime.strptime(startdate, '%Y%m%d')
     
-        conditions = [
-            (df['Date'] < year + relativedelta(months=+2)),
-            (df['Date'] >= year + relativedelta(months=+2)) & (df['Date'] < year + relativedelta(months=+3)),
-            (df['Date'] >= year + relativedelta(months=+3)) & (df['Date'] < year + relativedelta(months=+9)),
-            (df['Date'] >= year + relativedelta(months=+9)) & (df['Date'] < year + relativedelta(months=+10)),
-            (df['Date'] >= year + relativedelta(months=+10))
-        ]
-        values = [1.1, 1.0, 0.8, 1.0, 1.1]
-        degree_days_conditions = [
-            (self.heating_limit - (df['TG'] / 10) <= 0),
-            (self.heating_limit - (df['TG'] / 10) > 0)
-        ]
-        degree_days = [0, self.indoor_temp - (df['TG'] / 10)]
+        # add day, month and year number
+        df['day'] = df['Date'].dt.dayofyear
+        df['month'] = df['Date'].dt.month
+        df['year'] = df['Date'].dt.year
     
+        # calculate mean of every yearday in range
+        df_average = df.groupby('day')['TG'].mean().reset_index(name="TG_average")
+        df = pd.merge(df, df_average, on=['day'], how='left')
     
-        df['GD'] = np.select(degree_days_conditions, degree_days)
-        df['GGD'] = df.GD * np.select(conditions, values)
+        # add weight factor based on month
+        df['WF'] = df['month'].map(lambda value: WEIGHT_FACTOR[value])
+
+        # # Add constants
+        # df['T_heatinglimit'] = self.T_heatinglimit
+        # df['T_indoor'] = self.T_indoor
+
+        # Calculate degree days
+        df["DD"] = df.apply(lambda x: self.calculate_DD(x.TG, 1.0), axis=1)
+        # Calculate weighted degree days
+        df["WDD"] = df.apply(lambda x: self.calculate_DD(x.TG, x.WF), axis=1)
+        # Calculate 20 year average weighted degree days
+        df["WDD_average"] = df.apply(lambda x: self.calculate_DD(x.TG_average, x.WF), axis=1)
+
+        # calculate degree year
+        DD = df[df.year == year].DD.sum()
+
+        # calculate weighted degree year
+        WDD = df[df.year == year].WDD.sum()
+        WDD_average_total = df[df.year == year-1].WDD_average.sum()
+        WDD_average_cum = df[df.year == year].WDD_average.sum()
+    
+       # calculate gas prognose
+        gas_prognose = self.gasusage / WDD * (WDD + (WDD_average_total - WDD_average_cum))
 
         data = {}
         data["last_update"] = df["YYYYMMDD"].iloc[-1]
-        data["total_degree_days_this_year"] = df.GD.sum()
-        data["weighted_degree_days_year"] = df.GGD.sum()
+        data["total_degree_days_this_year"] = DD
+        data["weighted_degree_days_year"] = WDD
         return data
-    
-    
+
+    def calculate_DD(self, TG, WF):
+        """Calculate Weighted Degree Days"""
+        if self.T_heatinglimit - TG/10 <= 0:
+            return 0
+        else:
+            return(max(self.T_indoor - TG/10 , 0) * WF)
+
     def get_daily_data_df(self, startdate, enddate, stations, variables):
         """Request and parse data from knmi api.
     
