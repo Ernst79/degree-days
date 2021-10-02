@@ -1,4 +1,5 @@
 """Config flow for degree days integration."""
+import datetime
 import logging
 from urllib.parse import ParseResult, urlparse
 
@@ -15,11 +16,19 @@ from .const import (
     CONF_HEATING_LIMIT,
     CONF_INDOOR_TEMP,
     CONF_WEATHER_STATION,
+    CONF_STARTDAY,
+    CONF_STARTMONTH,
+    CONF_GAS_CONSUMPTION,
     DEFAULT_HEATING_LIMIT,
     DEFAULT_INDOOR_TEMP,
     DEFAULT_NAME,
     DEFAULT_WEATHER_STATION,
-    DOMAIN
+    DEFAULT_STARTDAY,
+    DEFAULT_STARTMONTH,
+    DEFAULT_GAS_CONSUMPTION,
+    DOMAIN,
+    MONTHS,
+    STATION_MAPPING
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,6 +41,24 @@ def degree_days_entries(hass: HomeAssistant):
         entry.data[CONF_WEATHER_STATION] for entry in hass.config_entries.async_entries(DOMAIN)
     }
 
+def date_validation(startday, startmonth) -> bool:
+    """Return True if weather station exists in configuration."""
+    _LOGGER.error("validatie van de datum")
+    isValidDate = True
+    try:
+        datetime.datetime.strptime(
+            "2021" + startmonth + str(startday), "%Y%B%d"
+        )
+    except ValueError:
+        isValidDate = False
+    return isValidDate
+
+def weather_station_in_configuration_exists(hass, weather_station_entry) -> bool:
+    """Return True if weather station exists in configuration."""
+    if weather_station_entry in degree_days_entries(hass):
+        return True
+    return False
+
 
 class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for degree days integration."""
@@ -42,12 +69,6 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize the config flow."""
         self._errors: dict = {}
 
-    def _weather_station_in_configuration_exists(self, weather_station_entry) -> bool:
-        """Return True if weather station exists in configuration."""
-        if weather_station_entry in degree_days_entries(self.hass):
-            return True
-        return False
-
     async def async_step_user(self, user_input=None):
         """Step when user initializes a integration."""
         self._errors = {}
@@ -57,16 +78,24 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             heating_limit = user_input.get(CONF_HEATING_LIMIT, DEFAULT_HEATING_LIMIT)
             indoor_temp = user_input.get(CONF_INDOOR_TEMP, DEFAULT_INDOOR_TEMP)
             weather_station_entry = user_input.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
+            startday = user_input.get(CONF_STARTDAY, DEFAULT_STARTDAY)
+            startmonth = user_input.get(CONF_STARTMONTH, DEFAULT_STARTMONTH)
+            gas_consumption = user_input.get(CONF_GAS_CONSUMPTION, DEFAULT_GAS_CONSUMPTION)
 
-            if self._weather_station_in_configuration_exists(weather_station_entry):
+            if weather_station_in_configuration_exists(self.hass, weather_station_entry):
                 self._errors[CONF_WEATHER_STATION] = "already_configured"
+            elif date_validation(startday, startmonth) == False:
+                self._errors[CONF_STARTDAY] = "invalid_startday"
             else:
                 return self.async_create_entry(
                     title=name,
                     data={
                         CONF_HEATING_LIMIT: heating_limit,
                         CONF_INDOOR_TEMP: indoor_temp,
-                        CONF_WEATHER_STATION: weather_station_entry
+                        CONF_WEATHER_STATION: weather_station_entry,
+                        CONF_STARTDAY: startday,
+                        CONF_STARTMONTH: startmonth,
+                        CONF_GAS_CONSUMPTION: gas_consumption
                     }
                 )
         else:
@@ -75,6 +104,9 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_HEATING_LIMIT] = DEFAULT_HEATING_LIMIT
             user_input[CONF_INDOOR_TEMP] = DEFAULT_INDOOR_TEMP
             user_input[CONF_WEATHER_STATION] = DEFAULT_WEATHER_STATION
+            user_input[CONF_STARTDAY] = DEFAULT_STARTDAY
+            user_input[CONF_STARTMONTH] = DEFAULT_STARTMONTH
+            user_input[CONF_GAS_CONSUMPTION] = DEFAULT_GAS_CONSUMPTION
 
         return await self._show_config_form(user_input)
 
@@ -100,18 +132,27 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     ): cv.positive_int,
                     vol.Required(
                         CONF_WEATHER_STATION, default=user_input.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
-                    ): str,
+                    ): vol.In(list(STATION_MAPPING)),
+                    vol.Required(
+                        CONF_STARTDAY, default=user_input.get(CONF_STARTDAY, DEFAULT_STARTDAY)
+                    ): cv.positive_int,
+                    vol.Required(
+                        CONF_STARTMONTH, default=user_input.get(CONF_STARTMONTH, DEFAULT_STARTMONTH)
+                    ):  vol.In(MONTHS),
+                    vol.Optional(
+                        CONF_GAS_CONSUMPTION, default=user_input.get(CONF_GAS_CONSUMPTION, DEFAULT_GAS_CONSUMPTION)
+                    ): cv.positive_int,
                 }
             ),
             errors=self._errors,
         )
-
 
 class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
     """Blueprint config flow options handler."""
 
     def __init__(self, config_entry):
         """Initialize options flow."""
+        self._errors: dict = {}
         self.config_entry = config_entry
         self.options = dict(config_entry.options)
 
@@ -123,7 +164,10 @@ class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
         """Handle a flow initialized by the user."""
         if user_input is not None:
             self.options.update(user_input)
-            return await self._update_options()
+            return self.async_create_entry(
+                title=self.config_entry.data.get(CONF_NAME),
+                data=self.options
+            )
 
         return self.async_show_form(
             step_id="user",
@@ -140,13 +184,17 @@ class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
                     ): cv.positive_int,
                     vol.Required(
                         CONF_WEATHER_STATION, default=self.options.get(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION)
-                    ): str,
+                    ): vol.In(list(STATION_MAPPING)),
+                    vol.Required(
+                        CONF_STARTDAY, default=self.options.get(CONF_STARTDAY, DEFAULT_STARTDAY)
+                    ): cv.positive_int,
+                    vol.Required(
+                        CONF_STARTMONTH, default=self.options.get(CONF_STARTMONTH, DEFAULT_STARTMONTH)
+                    ):  vol.In(MONTHS),
+                    vol.Optional(
+                        CONF_GAS_CONSUMPTION, default=self.options.get(CONF_GAS_CONSUMPTION, DEFAULT_GAS_CONSUMPTION)
+                    ): cv.positive_int,
                 }
             ),
-        )
-
-    async def _update_options(self):
-        """Update config entry options."""
-        return self.async_create_entry(
-            title=self.config_entry.data.get(CONF_NAME), data=self.options
+            errors=self._errors,
         )
