@@ -10,13 +10,13 @@
           "weather station": "Weather station (KNMI)",
           "startday": "Startday for sum of total degree days",
           "startmonth": "Startmonth for sum of total degree days",
-          "gas consumption": "Gas consumption in m3 (will be changed later to a sensor entity)"
+          "gas consumption": "Gas consumption in m3 (will be changed later to a sensor entity)",
+          "gas sensor": "Gas sensor entity"
         }
       }
     },
     "error": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_startday": "Invalid day (check day-month combination)"
     },
     "abort": {
@@ -35,9 +35,16 @@
           "weather station": "Weather station (KNMI)",
           "startday": "Startday for sum of total degree days",
           "startmonth": "Startmonth for sum of total degree days",
-          "gas consumption": "Gas consumption in m3 (will be changed later to a sensor entity)"
+          "gas consumption": "Gas consumption in m3 (will be changed later to a sensor entity)",
+          "gas sensor": "Gas sensor entity"
         }
       }
+    },
+    "error": {
+      "invalid_startday": "Invalid day (check day-month combination)"
+    },
+    "abort": {
+      "invalid_startday": "Invalid day (check day-month combination)"
     }
   }
 }

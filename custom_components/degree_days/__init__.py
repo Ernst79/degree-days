@@ -2,7 +2,6 @@
 from datetime import timedelta
 import datetime
 import logging
-from urllib.parse import ParseResult, urlparse
 
 from .knmi import KNMI
 from requests.exceptions import HTTPError, Timeout
@@ -18,6 +17,7 @@ from .const import (
     CONF_STARTDAY,
     CONF_STARTMONTH,
     CONF_GAS_CONSUMPTION,
+    CONF_GAS_SENSOR,
     DOMAIN
 )
 
@@ -53,6 +53,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         self.indoor_temp = entry.data[CONF_INDOOR_TEMP]
         self.weather_station = entry.data[CONF_WEATHER_STATION]
         self.gas_consumption = entry.data[CONF_GAS_CONSUMPTION]
+        self.gas_sensor = entry.data[CONF_GAS_SENSOR]
         self.start_day = entry.data[CONF_STARTDAY]
         self.start_month = entry.data[CONF_STARTMONTH]
         self.unique_id = entry.entry_id

@@ -10,13 +10,13 @@
           "weather station": "Weerstation (KNMI)",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)"
+          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)",
+          "gas sensor": "Gas sensor entiteit"
         }
       }
     },
     "error": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_startday": "Foutieve dag (controleer dag-maand combinatie)"
     },
     "abort": {
@@ -35,9 +35,16 @@
           "weather station": "Weerstation (KNMI)",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)"
+          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)",
+          "gas sensor": "Gas sensor entiteit"
         }
       }
+    },
+    "error": {
+      "invalid_startday": "Foutieve dag (controleer dag-maand combinatie)"
+    },
+    "abort": {
+      "invalid_startday": "Foutieve dag (controleer dag-maand combinatie)"
     }
   }
 }
