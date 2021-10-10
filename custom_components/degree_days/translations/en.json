@@ -4,13 +4,11 @@
       "user": {
         "title": "Define your Degree Days integration",
         "data": {
-          "name": "The prefix to be used for your Degree Day sensors",
-          "heating limit": "Heating temperature limit",
-          "mean indoor temperature": "Mean indoor temperature",
           "weather station": "Weather station (KNMI)",
+          "mean indoor temperature": "Mean indoor temperature",
+          "heating limit": "Heating temperature limit",
           "startday": "Startday for sum of total degree days",
           "startmonth": "Startmonth for sum of total degree days",
-          "gas consumption": "Gas consumption in m3 (will be changed later to a sensor entity)",
           "gas sensor": "Gas sensor entity"
         }
       }
@@ -29,13 +27,11 @@
       "user": {
         "title": "Degree Days integration options",
         "data": {
-          "name": "The prefix to be used for your Degree Day sensors",
-          "heating limit": "Heating temperature limit",
-          "mean indoor temperature": "Mean indoor temperature",
           "weather station": "Weather station (KNMI)",
+          "mean indoor temperature": "Mean indoor temperature",
+          "heating limit": "Heating temperature limit",
           "startday": "Startday for sum of total degree days",
           "startmonth": "Startmonth for sum of total degree days",
-          "gas consumption": "Gas consumption in m3 (will be changed later to a sensor entity)",
           "gas sensor": "Gas sensor entity"
         }
       }

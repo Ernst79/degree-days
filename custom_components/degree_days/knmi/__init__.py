@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 from io import StringIO
 from datetime import datetime
+import logging
 
 from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
@@ -13,13 +14,17 @@ class KNMI(object):
         self.T_indoor = T_indoor
         self.T_heatinglimit = T_heatinglimit
         self.gasusage = gasusage
-
         data = self.get_degree_days()
 
         self.last_update = data["last_update"]
         self.total_degree_days_this_year = data["total_degree_days_this_year"]
         self.weighted_degree_days_year = data["weighted_degree_days_year"]
-
+        if self.gasusage:
+            self.gas_per_weighted_degree_day = data["gas_per_weighted_degree_day"]
+            self.gas_prognose = data["gas_prognose"]
+        else:
+            self.gas_per_weighted_degree_day = "Unavailable"
+            self.gas_prognose = "Unavailable"
 
     def get_degree_days(self):
         enddate = datetime.now().strftime("%Y%m%d")
@@ -64,13 +69,20 @@ class KNMI(object):
         WDD_average_total = df[df.year == year-1].WDD_average.sum()
         WDD_average_cum = df[df.year == year].WDD_average.sum()
     
-       # calculate gas prognose
-        gas_prognose = self.gasusage / WDD * (WDD + (WDD_average_total - WDD_average_cum))
-
         data = {}
+        
         data["last_update"] = df["YYYYMMDD"].iloc[-1]
         data["total_degree_days_this_year"] = DD
         data["weighted_degree_days_year"] = WDD
+
+        # calculate gas prognose
+        if self.gasusage:
+            gas_prognose = round(self.gasusage / WDD * (WDD + (WDD_average_total - WDD_average_cum)), 1)
+            gas_per_weighted_degree_day = round(self.gasusage / WDD, 3)
+            
+            data["gas_per_weighted_degree_day"] = gas_per_weighted_degree_day
+            data["gas_prognose"] = gas_prognose
+
         return data
 
     def calculate_DD(self, TG, WF):
