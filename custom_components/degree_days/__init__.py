@@ -16,8 +16,13 @@ from .const import (
     CONF_WEATHER_STATION,
     CONF_STARTDAY,
     CONF_STARTMONTH,
-    CONF_GAS_CONSUMPTION,
     CONF_GAS_SENSOR,
+    DEFAULT_HEATING_LIMIT,
+    DEFAULT_INDOOR_TEMP,
+    DEFAULT_WEATHER_STATION,
+    DEFAULT_STARTDAY,
+    DEFAULT_STARTMONTH,
+    DEFAULT_GAS_SENSOR,
     DOMAIN
 )
 
@@ -49,16 +54,33 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
             hass, _LOGGER, name="Degree Days", update_interval=timedelta(seconds=600)
         )
 
-        self.heating_limit = entry.data[CONF_HEATING_LIMIT]
-        self.indoor_temp = entry.data[CONF_INDOOR_TEMP]
-        self.weather_station = entry.data[CONF_WEATHER_STATION]
-        self.gas_consumption = entry.data[CONF_GAS_CONSUMPTION]
-        self.gas_sensor = entry.data[CONF_GAS_SENSOR]
-        self.start_day = entry.data[CONF_STARTDAY]
-        self.start_month = entry.data[CONF_STARTMONTH]
+        """Populate default options."""
+        if not self.config_entry.options:
+            data = dict(self.config_entry.data)
+            options = {
+                CONF_WEATHER_STATION: data.pop(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION),
+                CONF_INDOOR_TEMP: data.pop(CONF_INDOOR_TEMP, DEFAULT_INDOOR_TEMP),
+                CONF_HEATING_LIMIT: data.pop(CONF_HEATING_LIMIT, DEFAULT_HEATING_LIMIT),
+                CONF_STARTDAY: data.pop(CONF_STARTDAY, DEFAULT_STARTDAY),
+                CONF_STARTMONTH: data.pop(CONF_STARTMONTH, DEFAULT_STARTMONTH),
+                CONF_GAS_SENSOR: data.pop(CONF_GAS_SENSOR, DEFAULT_GAS_SENSOR),
+            }
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=data,
+                options=options
+            )
+
+        self.weather_station = entry.options[CONF_WEATHER_STATION]
+        self.indoor_temp = entry.options[CONF_INDOOR_TEMP]
+        self.heating_limit = entry.options[CONF_HEATING_LIMIT]
+        self.start_day = entry.options[CONF_STARTDAY]
+        self.start_month = entry.options[CONF_STARTMONTH]
+        self.gas_sensor = entry.options[CONF_GAS_SENSOR]
+
         self.unique_id = entry.entry_id
         self.name = entry.title
-        
         d = datetime.datetime.strptime(
             "2021" + self.start_month + str(self.start_day), "%Y%B%d"
         )
@@ -66,6 +88,13 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Update the data from the KNMI device."""
+        
+        # Get gas consumption state
+        try:
+            self.gas_sensor_state = self.hass.states.get(self.gas_sensor)
+            self.gas_consumption = float(self.gas_sensor_state.state)
+        except AttributeError as err:
+            self.gas_consumption = 0
         try:
             data = await self.hass.async_add_executor_job(
                 KNMI,

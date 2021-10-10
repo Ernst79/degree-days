@@ -4,8 +4,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import (
+    DEVICE_CLASS_GAS,
     STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_TOTAL,
     SensorEntityDescription,
 )
 from homeassistant.const import (
@@ -22,16 +23,13 @@ CONF_INDOOR_TEMP = "mean indoor temperature"
 CONF_WEATHER_STATION = "weather station"
 CONF_STARTDAY = "startday"
 CONF_STARTMONTH = "startmonth"
-CONF_GAS_CONSUMPTION = "gas consumption"
 CONF_GAS_SENSOR = "gas sensor"
 
 DEFAULT_HEATING_LIMIT = 18.0
 DEFAULT_INDOOR_TEMP = 18.0
-DEFAULT_NAME = "degree days"
 DEFAULT_WEATHER_STATION = "De Bilt"
 DEFAULT_STARTDAY = "01"
 DEFAULT_STARTMONTH = "January"
-DEFAULT_GAS_CONSUMPTION = 1500
 DEFAULT_GAS_SENSOR = ""
 
 # KNMI weather stations (NL).
@@ -129,7 +127,7 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:thermometer",
         native_unit_of_measurement=TEMP_CELSIUS,
         device_class=None,
-        state_class=STATE_CLASS_TOTAL_INCREASING,
+        state_class=STATE_CLASS_TOTAL,
     ),
     DegreeDaysSensorEntityDescription(
         key="weighted_degree_days_year",
@@ -137,6 +135,22 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:thermometer",
         native_unit_of_measurement=TEMP_CELSIUS,
         device_class=None,
-        state_class=STATE_CLASS_TOTAL_INCREASING,
+        state_class=STATE_CLASS_TOTAL,
+    ),
+    DegreeDaysSensorEntityDescription(
+        key="gas_per_weighted_degree_day",
+        name="gas consumption per weighted degree day",
+        icon="mdi:fire",
+        native_unit_of_measurement=VOLUME_CUBIC_METERS,
+        device_class=DEVICE_CLASS_GAS,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    DegreeDaysSensorEntityDescription(
+        key="gas_prognose",
+        name="gas prognose",
+        icon="mdi:fire",
+        native_unit_of_measurement=VOLUME_CUBIC_METERS,
+        device_class=DEVICE_CLASS_GAS,
+        state_class=STATE_CLASS_TOTAL,
     ),
 )

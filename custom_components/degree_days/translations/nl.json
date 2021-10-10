@@ -4,13 +4,11 @@
       "user": {
         "title": "Definieer de Degree Days (graaddagen) integratie",
         "data": {
-          "name": "Het voorvoegsel voor de namen van de Degree Day sensoren",
-          "heating limit": "Stookgrens",
-          "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
           "weather station": "Weerstation (KNMI)",
+          "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
+          "heating limit": "Stookgrens",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)",
           "gas sensor": "Gas sensor entiteit"
         }
       }
@@ -29,13 +27,11 @@
       "user": {
         "title": "Degree Days integration opties",
         "data": {
-          "name": "Het voorvoegsel voor de namen van de Degree Day sensoren",
-          "heating limit": "Stookgrens",
-          "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
           "weather station": "Weerstation (KNMI)",
+          "mean indoor temperature": "Etmaalgemiddelde binnentemperatuur",
+          "heating limit": "Stookgrens",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas consumption": "Gas consumptie in m3 (wordt later aangepast naar een sensor entity)",
           "gas sensor": "Gas sensor entiteit"
         }
       }
