@@ -10,12 +10,14 @@ from homeassistant.helpers import config_validation as cv
 
 from .const import (
     CONF_GAS_SENSOR,
+    CONF_GAS_USE_OTHER,
     CONF_HEATING_LIMIT,
     CONF_INDOOR_TEMP,
     CONF_STARTDAY,
     CONF_STARTMONTH,
     CONF_WEATHER_STATION,
     DEFAULT_GAS_SENSOR,
+    DEFAULT_GAS_USE_OTHER,
     DEFAULT_HEATING_LIMIT,
     DEFAULT_INDOOR_TEMP,
     DEFAULT_STARTDAY,
@@ -74,6 +76,7 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_STARTDAY] = DEFAULT_STARTDAY
         user_input[CONF_STARTMONTH] = DEFAULT_STARTMONTH
         user_input[CONF_GAS_SENSOR] = DEFAULT_GAS_SENSOR
+        user_input[CONF_GAS_USE_OTHER] = DEFAULT_GAS_USE_OTHER
 
         return await self._show_config_form(user_input)
 
@@ -106,6 +109,9 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(
                         CONF_GAS_SENSOR, default=user_input.get(CONF_GAS_SENSOR, DEFAULT_GAS_SENSOR)
                     ): str,
+                    vol.Optional(
+                        CONF_GAS_USE_OTHER, default=user_input.get(CONF_GAS_USE_OTHER, DEFAULT_GAS_USE_OTHER)
+                    ): cv.positive_float,
                 }
             ),
             errors=self._errors,
@@ -175,6 +181,9 @@ class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_GAS_SENSOR, default=self.options.get(CONF_GAS_SENSOR, DEFAULT_GAS_SENSOR)
                     ): str,
+                    vol.Optional(
+                        CONF_GAS_USE_OTHER, default=self.options.get(CONF_GAS_USE_OTHER, DEFAULT_GAS_USE_OTHER)
+                    ): cv.positive_int,
                 }
             ),
             errors=self._errors,
