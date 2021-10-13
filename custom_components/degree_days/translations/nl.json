@@ -9,7 +9,8 @@
           "heating limit": "Stookgrens",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas sensor": "Gas sensor entiteit"
+          "gas sensor": "Gas sensor entiteit",
+          "gas use other": "Gas gebruik per maand voor bad, douche en koken"
         }
       }
     },
@@ -32,7 +33,8 @@
           "heating limit": "Stookgrens",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas sensor": "Gas sensor entiteit"
+          "gas sensor": "Gas sensor entiteit",
+          "gas use other": "Gas gebruik per maand voor bad, douche en koken"
         }
       }
     },

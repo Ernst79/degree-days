@@ -32,3 +32,6 @@ Month from which the yearly totals are computed. When used in combination with a
 
 - **Gas sensor entity**
 Gas sensor entity with the total consumption this year.
+
+- **Monthly gas usage for shower, bath and cooking**
+Monthly gas usage for shower, bath and cooking. This will be substracted from your gas consumption, before calculating the gas usage per weighted degree day.

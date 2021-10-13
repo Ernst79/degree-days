@@ -5,7 +5,7 @@
     "documentation": "https://www.home-assistant.io/integrations/degree_days",
     "codeowners": ["@Ernst79", "@nelbs"],
     "requirements": [],
-    "version": "0.5.0",
+    "version": "0.6.0",
     "iot_class": "cloud_polling"
   }
   

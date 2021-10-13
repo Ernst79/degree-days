@@ -17,12 +17,14 @@ from .const import (
     CONF_STARTDAY,
     CONF_STARTMONTH,
     CONF_GAS_SENSOR,
+    CONF_GAS_USE_OTHER,
     DEFAULT_HEATING_LIMIT,
     DEFAULT_INDOOR_TEMP,
     DEFAULT_WEATHER_STATION,
     DEFAULT_STARTDAY,
     DEFAULT_STARTMONTH,
     DEFAULT_GAS_SENSOR,
+    DEFAULT_GAS_USE_OTHER,
     DOMAIN
 )
 
@@ -64,6 +66,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                 CONF_STARTDAY: data.pop(CONF_STARTDAY, DEFAULT_STARTDAY),
                 CONF_STARTMONTH: data.pop(CONF_STARTMONTH, DEFAULT_STARTMONTH),
                 CONF_GAS_SENSOR: data.pop(CONF_GAS_SENSOR, DEFAULT_GAS_SENSOR),
+                CONF_GAS_USE_OTHER: data.pop(CONF_GAS_USE_OTHER, DEFAULT_GAS_USE_OTHER),
             }
 
             self.hass.config_entries.async_update_entry(
@@ -78,7 +81,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         self.start_day = entry.options[CONF_STARTDAY]
         self.start_month = entry.options[CONF_STARTMONTH]
         self.gas_sensor = entry.options[CONF_GAS_SENSOR]
-
+        self.gas_use_other = entry.options[CONF_GAS_USE_OTHER]
         self.unique_id = entry.entry_id
         self.name = entry.title
         d = datetime.datetime.strptime(
@@ -102,7 +105,8 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                 self.weather_station,
                 self.indoor_temp,
                 self.heating_limit,
-                self.gas_consumption
+                self.gas_consumption,
+                self.gas_use_other
             )
 
         except (OSError, Timeout, HTTPError) as err:
