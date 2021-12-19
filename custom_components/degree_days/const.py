@@ -4,10 +4,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import (
-    DEVICE_CLASS_GAS,
-    STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL,
+    SensorDeviceClass,
     SensorEntityDescription,
+    SensorStateClass,
 )
 from homeassistant.const import (
     VOLUME_CUBIC_METERS,
@@ -129,7 +128,7 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:thermometer",
         native_unit_of_measurement=TEMP_CELSIUS,
         device_class=None,
-        state_class=STATE_CLASS_TOTAL,
+        state_class=SensorStateClass.TOTAL,
     ),
     DegreeDaysSensorEntityDescription(
         key="weighted_degree_days_year",
@@ -137,22 +136,22 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:thermometer",
         native_unit_of_measurement=TEMP_CELSIUS,
         device_class=None,
-        state_class=STATE_CLASS_TOTAL,
+        state_class=SensorStateClass.TOTAL,
     ),
     DegreeDaysSensorEntityDescription(
         key="gas_per_weighted_degree_day",
         name="gas consumption per weighted degree day",
         icon="mdi:fire",
         native_unit_of_measurement=VOLUME_CUBIC_METERS,
-        device_class=DEVICE_CLASS_GAS,
-        state_class=STATE_CLASS_MEASUREMENT,
+        device_class=SensorDeviceClass.GAS,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
         key="gas_prognose",
         name="gas prognose",
         icon="mdi:fire",
         native_unit_of_measurement=VOLUME_CUBIC_METERS,
-        device_class=DEVICE_CLASS_GAS,
-        state_class=STATE_CLASS_TOTAL,
+        device_class=SensorDeviceClass.GAS,
+        state_class=SensorStateClass.TOTAL,
     ),
 )
