@@ -37,6 +37,7 @@ class KNMI(object):
     
         df = df.rename(columns={'   TG': 'TG'})
         df['Date'] = pd.to_datetime(df['YYYYMMDD'], format='%Y%m%d')
+        df["TG"] = pd.to_numeric(df["TG"], errors='coerce', downcast="float")
     
         # add day, month and year number
         df['day'] = df['Date'].dt.dayofyear
