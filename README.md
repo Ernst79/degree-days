@@ -15,7 +15,14 @@ In the current implementation, we follow the approach of Mindergas. Weigthed deg
 
 ## Gas prognose and comparison
 
-You can add a gas sensor to calculate the gas consumption per weighted degree day from the start of the year, which can be used to compare your gas consumption with other users or previous years. Comparison based on gas consumption per weighted degree day corrects for effects of a cold or warm, which gives you a better insight into the effect of e.g. insulation or the expansion of your family, on your gas consumption. The integration will also calculate a prognose for the gas consumption for the current year.  
+You can add a gas sensor to calculate the gas consumption per weighted degree day from the start of the year, which can be used to compare your gas consumption with other users or previous years. Comparison based on gas consumption per weighted degree day corrects for effects of a cold or warm, which gives you a better insight into the effect of e.g. insulation or the expansion of your family, on your gas consumption. The integration will also calculate a prognose for the gas consumption for the current year.
+
+## How to install
+
+1. Install Degree-days via [hacs](https://hacs.xyz/)
+2. Reboot HA
+3. In HA goto Config -> integrations. Add Degree-days integration.
+4. In your lovelace dashboard, add a card with the degree days entities.
 
 ## Options
 
