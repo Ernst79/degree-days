@@ -85,7 +85,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         self.unique_id = entry.entry_id
         self.name = entry.title
         d = datetime.datetime.strptime(
-            "2021" + self.start_month + str(self.start_day), "%Y%B%d"
+            "2022" + self.start_month + str(self.start_day), "%Y%B%d"
         )
         self.startdate = d.strftime("%Y%m%d")
 
