@@ -98,7 +98,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         else:
             year = today.year
         self.startdate = datetime.datetime.strptime(str(year) + self.start_month + str(self.start_day),
-                                                    "%Y%m%d").strftime("%Y%m%d")
+                                                    "%Y%B%d").strftime("%Y%m%d")
 
     async def _async_update_data(self):
         """Update the data from the KNMI device."""
