@@ -84,10 +84,21 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         self.gas_use_other = entry.options[CONF_GAS_USE_OTHER]
         self.unique_id = entry.entry_id
         self.name = entry.title
-        d = datetime.datetime.strptime(
-            "2022" + self.start_month + str(self.start_day), "%Y%B%d"
-        )
-        self.startdate = d.strftime("%Y%m%d")
+
+        startdate = datetime.datetime.strptime(self.start_month + str(self.start_day), "%B%d")
+        today = datetime.datetime.today()
+        # define year of given start month and start day
+        if today.month < startdate.month:
+            year = today.year - 1
+        elif today.month == startdate.month:
+            if today.day < startdate.day:
+                year = today.year - 1
+            else:
+                year = today.year
+        else:
+            year = today.year
+        self.startdate = datetime.datetime.strptime(str(year) + self.start_month + str(self.start_day),
+                                                    "%Y%m%d").strftime("%Y%m%d")
 
     async def _async_update_data(self):
         """Update the data from the KNMI device."""

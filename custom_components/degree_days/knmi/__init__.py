@@ -33,7 +33,9 @@ class KNMI(object):
         station_code = STATION_MAPPING[self.station]
         year = datetime.strptime(self.startdate, '%Y%m%d').year
         variables = ['TG']
-        df = self.get_daily_data_df("20000101", enddate, [station_code], variables)
+        # Get data for the last 20 years
+        df = self.get_daily_data_df(self.startdate.replace(str(year), str(int(year) - 20), 1), enddate, [station_code],
+                               variables)
     
         df = df.rename(columns={'   TG': 'TG'})
         df['Date'] = pd.to_datetime(df['YYYYMMDD'], format='%Y%m%d')
@@ -61,10 +63,13 @@ class KNMI(object):
         # calculate degree year
         DD = df[df.year == year].DD.sum()
 
+        # get 1 year before startdate
+        startdate_offset_year = self.startdate.replace(str(year), str(int(year) - 1), 1)
+
         # calculate weighted degree year
-        WDD = df[df.year == year].WDD.sum()
-        WDD_average_total = df[df.year == year-1].WDD_average.sum()
-        WDD_average_cum = df[df.year == year].WDD_average.sum()
+        WDD = df[df.Date >= self.startdate].WDD.sum()
+        WDD_average_total = df[df["Date"].between(startdate_offset_year, self.startdate)].WDD_average.sum()
+        WDD_average_cum = df[df.Date >= self.startdate].WDD_average.sum()
     
         data = {}
         

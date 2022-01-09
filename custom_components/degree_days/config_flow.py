@@ -60,7 +60,7 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass, user_input[CONF_WEATHER_STATION]
             )
             if not valid_date:
-                 self._errors[CONF_STARTDAY] = "invalid_startday"
+                self._errors[CONF_STARTDAY] = "invalid_startday"
             elif invalid_station:
                 self._errors[CONF_WEATHER_STATION] = "already_configured"
             else:
@@ -122,7 +122,7 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         isValidDate = True
         try:
             datetime.datetime.strptime(
-                "2021" + startmonth + str(startday), "%Y%B%d"
+                str(datetime.datetime.now().year) + startmonth + str(startday), "%Y%B%d"
             )
             return True
         except ValueError:
@@ -200,7 +200,7 @@ class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
         isValidDate = True
         try:
             datetime.datetime.strptime(
-                "2021" + startmonth + str(startday), "%Y%B%d"
+                str(datetime.datetime.now().year) + startmonth + str(startday), "%Y%B%d"
             )
             return True
         except ValueError:
