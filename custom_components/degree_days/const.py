@@ -128,7 +128,7 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:thermometer",
         native_unit_of_measurement=TEMP_CELSIUS,
         device_class=None,
-        state_class=SensorStateClass.TOTAL,
+        state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     DegreeDaysSensorEntityDescription(
         key="weighted_degree_days_year",
@@ -144,7 +144,7 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:fire",
         native_unit_of_measurement=VOLUME_CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL,
     ),
     DegreeDaysSensorEntityDescription(
         key="gas_prognose",
