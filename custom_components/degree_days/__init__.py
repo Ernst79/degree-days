@@ -107,7 +107,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         try:
             self.gas_sensor_state = self.hass.states.get(self.gas_sensor)
             self.gas_consumption = float(self.gas_sensor_state.state)
-        except AttributeError as err:
+        except AttributeError:
             self.gas_consumption = 0
         try:
             data = await self.hass.async_add_executor_job(
