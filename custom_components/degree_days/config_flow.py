@@ -189,6 +189,15 @@ class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
             errors=self._errors,
         )
 
+    async def async_end(self):
+        """Finalization of the ConfigEntry creation"""
+        _LOGGER.info(
+            "Recreating entry %s due to configuration change",
+            self.config_entry.entry_id,
+        )
+        self.hass.config_entries.async_update_entry(self.config_entry, data=self._infos)
+        return self.async_create_entry(title=None, data=None)
+
     async def _update_options(self):
         """Update config entry options."""
         return self.async_create_entry(
