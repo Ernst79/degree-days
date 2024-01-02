@@ -79,11 +79,11 @@ class KNMI(object):
         data["total_degree_days_this_year"] = DD
         data["weighted_degree_days_year"] = WDD
         last_update = str(df["YYYYMMDD"].iloc[-1])
+        number_of_days_gas = (datetime.strptime(enddate, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
 
         # calculate gas prognose
         if self.gas_usage and number_of_days_gas > 0:
             # estimate gas consumption at the end of KNMI data
-            number_of_days_gas = (datetime.strptime(enddate, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
             number_of_days_knmi = (datetime.strptime(last_update, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
 
             gas_use_other = self.gas_other_per_day * number_of_days_gas
