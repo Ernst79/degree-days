@@ -7,7 +7,7 @@ This integration will collect daily averaged temperatures of the last year from 
 ## (Weighted) degree days
 For more information on degree days and its use, have a look at the website [Degree Days.net](https://www.degreedays.net/) (English) or [Mindergas](https://mindergas.nl/degree_days/explanation) (Dutch). 
 
-In the current implementation, we follow the approach of Mindergas. Weigthed degree days are determined by multiplying the number of degree days in a certain month with a certain factor. The applied multiplication factors are:
+In the current implementation, we follow the approach of Mindergas. Weighted degree days are determined by multiplying the number of degree days in a certain month with a certain factor. The applied multiplication factors are:
 
 - April till September: 0,8
 - March and October: 1,0
@@ -15,7 +15,7 @@ In the current implementation, we follow the approach of Mindergas. Weigthed deg
 
 ## Gas prognose and comparison
 
-You can add a gas sensor to calculate the gas consumption per weighted degree day from the start of the year, which can be used to compare your gas consumption with other users or previous years. Comparison based on gas consumption per weighted degree day corrects for effects of a cold or warm, which gives you a better insight into the effect of e.g. insulation or the expansion of your family, on your gas consumption. The integration will also calculate a prognose for the gas consumption for the current year.
+You can add a gas sensor to calculate the gas consumption per weighted degree day from the start of the year, which can be used to compare your gas consumption with other users or previous years. Comparison based on gas consumption per weighted degree day corrects for effects of a cold or warm, which gives you a better insight into the effect of e.g. insulation or change in the number of family members, on your gas consumption. The integration will also calculate a prognose for the gas consumption for the current year.
 
 ## How to install
 
@@ -45,15 +45,15 @@ In the spring and autumn, the heating will not always be turned on directly, eve
 
 **Startday for sum of total degree days**
 
-Day of the month from which the yearly totals are computed. When used in combination with a gas sensor, this has to be the same day as the yearly total gas consumption is determined. 
+Day of the month from which the yearly totals are computed. When used in combination with a gas sensor, this has to be the same day as the total gas consumption is determined from. E.g. if your gas sensor reports the total gas consumption starting at the 14th of February, set the Startday for the sum of total degree days to the 14th. 
 
 **Startmonth for sum of total degree days**
 
-Month from which the yearly totals are computed. When used in combination with a gas sensor, this has to be the same day as the yearly total gas consumption is determined. 
+Month from which the yearly totals are computed. When used in combination with a gas sensor, this has to be the same month as the total gas consumption is determined from. E.g. if your gas sensor reports the total gas consumption starting at the 14th of February, set the Startmonth for the sum of total degree days to the February. 
 
 **Gas sensor entity**
 
-Gas sensor entity with the total consumption this year.
+Gas sensor entity with the total consumption of gas in m3, starting at the set Startday and Startmonth of the current year.
 
 **Monthly gas usage for shower, bath and cooking**
 
