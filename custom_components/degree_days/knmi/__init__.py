@@ -81,7 +81,7 @@ class KNMI(object):
         last_update = str(df["YYYYMMDD"].iloc[-1])
 
         # calculate gas prognose
-        if self.gas_usage:
+        if self.gas_usage and number_of_days_gas > 0:
             # estimate gas consumption at the end of KNMI data
             number_of_days_gas = (datetime.strptime(enddate, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
             number_of_days_knmi = (datetime.strptime(last_update, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
