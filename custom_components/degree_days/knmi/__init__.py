@@ -24,7 +24,7 @@ class KNMI(object):
         self.weighted_degree_days_year = data["weighted_degree_days_year"]
         if self.heatpump:
             if self.total_consumption:
-                self.ebergy_consumption_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
+                self.energy_consumption_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
                 self.energy_consumption_prognose = data["consumption_prognose"]
             else:
                 self.energy_consumption_per_weighted_degree_day = None
