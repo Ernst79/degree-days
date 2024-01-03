@@ -9,16 +9,18 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
-    CONF_GAS_SENSOR,
-    CONF_GAS_USE_OTHER,
+    CONF_CONSUMPTION_SENSOR,
+    CONF_DHW_CONSUMPTION,
     CONF_HEATING_LIMIT,
+    CONF_HEATPUMP,
     CONF_INDOOR_TEMP,
     CONF_STARTDAY,
     CONF_STARTMONTH,
     CONF_WEATHER_STATION,
-    DEFAULT_GAS_SENSOR,
-    DEFAULT_GAS_USE_OTHER,
+    DEFAULT_CONSUMPTION_SENSOR,
+    DEFAULT_DHW_CONSUMPTION,
     DEFAULT_HEATING_LIMIT,
+    DEFAULT_HEATPUMP,
     DEFAULT_INDOOR_TEMP,
     DEFAULT_STARTDAY,
     DEFAULT_STARTMONTH,
@@ -42,7 +44,7 @@ def degree_days_entries(hass: HomeAssistant):
 class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for degree days integration."""
 
-    VERSION = 1
+    VERSION = 2
 
     def __init__(self) -> None:
         """Initialize the config flow."""
@@ -75,8 +77,9 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_HEATING_LIMIT] = DEFAULT_HEATING_LIMIT
         user_input[CONF_STARTDAY] = DEFAULT_STARTDAY
         user_input[CONF_STARTMONTH] = DEFAULT_STARTMONTH
-        user_input[CONF_GAS_SENSOR] = DEFAULT_GAS_SENSOR
-        user_input[CONF_GAS_USE_OTHER] = DEFAULT_GAS_USE_OTHER
+        user_input[CONF_CONSUMPTION_SENSOR] = DEFAULT_CONSUMPTION_SENSOR
+        user_input[CONF_DHW_CONSUMPTION] = DEFAULT_DHW_CONSUMPTION
+        user_input[CONF_HEATPUMP] = DEFAULT_HEATPUMP
 
         return await self._show_config_form(user_input)
 
@@ -107,11 +110,14 @@ class DegreeDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_STARTMONTH, default=user_input.get(CONF_STARTMONTH, DEFAULT_STARTMONTH)
                     ):  vol.In(MONTHS),
                     vol.Optional(
-                        CONF_GAS_SENSOR, default=user_input.get(CONF_GAS_SENSOR, DEFAULT_GAS_SENSOR)
+                        CONF_CONSUMPTION_SENSOR, default=user_input.get(CONF_CONSUMPTION_SENSOR, DEFAULT_CONSUMPTION_SENSOR)
                     ): str,
                     vol.Optional(
-                        CONF_GAS_USE_OTHER, default=user_input.get(CONF_GAS_USE_OTHER, DEFAULT_GAS_USE_OTHER)
+                        CONF_DHW_CONSUMPTION, default=user_input.get(CONF_DHW_CONSUMPTION, DEFAULT_DHW_CONSUMPTION)
                     ): cv.positive_float,
+                    vol.Optional(
+                        CONF_HEATPUMP, default=user_input.get(CONF_HEATPUMP, DEFAULT_HEATPUMP)
+                    ): cv.boolean,
                 }
             ),
             errors=self._errors,
@@ -179,11 +185,14 @@ class DegreeDaysOptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_STARTMONTH, default=self.options.get(CONF_STARTMONTH, DEFAULT_STARTMONTH)
                     ):  vol.In(MONTHS),
                     vol.Optional(
-                        CONF_GAS_SENSOR, default=self.options.get(CONF_GAS_SENSOR, DEFAULT_GAS_SENSOR)
+                        CONF_CONSUMPTION_SENSOR, default=self.options.get(CONF_CONSUMPTION_SENSOR, DEFAULT_CONSUMPTION_SENSOR)
                     ): str,
                     vol.Optional(
-                        CONF_GAS_USE_OTHER, default=self.options.get(CONF_GAS_USE_OTHER, DEFAULT_GAS_USE_OTHER)
+                        CONF_DHW_CONSUMPTION, default=self.options.get(CONF_DHW_CONSUMPTION, DEFAULT_DHW_CONSUMPTION)
                     ): cv.positive_int,
+                    vol.Optional(
+                        CONF_HEATPUMP, default=self.options.get(CONF_HEATPUMP, DEFAULT_HEATPUMP)
+                    ): cv.boolean,
                 }
             ),
             errors=self._errors,
