@@ -56,7 +56,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_migrate_entry(hass, config_entry):
     """Migrate config entry to new version."""
-    if config_entry.version <= 4:
+    if config_entry.version == 1:
         options = dict(config_entry.options)
         if CONF_HEATPUMP not in options:
             options[CONF_HEATPUMP] = DEFAULT_HEATPUMP
@@ -69,9 +69,9 @@ async def async_migrate_entry(hass, config_entry):
             options[CONF_DHW_CONSUMPTION] = options[CONF_GAS_USE_OTHER]
             del options[CONF_GAS_USE_OTHER]
 
-        config_entry.version = 5
+        config_entry.version = 2
         hass.config_entries.async_update_entry(config_entry, options=options)
-        _LOGGER.error("Migrated config entry to version %d", config_entry.version)
+        _LOGGER.info("Migrated config entry to version %d", config_entry.version)
 
     return True
 
