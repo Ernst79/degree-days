@@ -9,8 +9,9 @@
           "heating limit": "Stookgrens",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas sensor": "Gas sensor entiteit",
-          "gas use other": "Gas gebruik per maand voor bad, douche en koken"
+          "consumption sensor": "Gas/Energie sensor entiteit met totaal verbruik vanaf startdag en maand",
+          "dhw consumption": "Gas/Energie verbruik per maand voor huishoudelijk warm water",
+          "heatpump": "Warmtepomp/Electrische verwarming (gebruikt kWh in plaats van m3 als eenheid)"
         }
       }
     },
@@ -33,8 +34,9 @@
           "heating limit": "Stookgrens",
           "startday": "Startdag voor optelling totaal aantal graaddagen",
           "startmonth": "Startmaand voor optelling totaal aantal graaddagen",
-          "gas sensor": "Gas sensor entiteit",
-          "gas use other": "Gas gebruik per maand voor bad, douche en koken"
+          "consumption sensor": "Gas/Energie sensor entiteit met totaal verbruik vanaf startdag en maand",
+          "dhw consumption": "Gas/Energie verbruik per maand voor huishoudelijk warm water",
+          "heatpump": "Warmtepomp/Electrische verwarming (gebruikt kWh in plaats van m3 als eenheid)"
         }
       }
     },
