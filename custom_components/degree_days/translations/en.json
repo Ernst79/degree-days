@@ -9,8 +9,9 @@
           "heating limit": "Heating temperature limit",
           "startday": "Startday for sum of total degree days",
           "startmonth": "Startmonth for sum of total degree days",
-          "gas sensor": "Gas sensor entity",
-          "gas use other": "Gas usage per month for shower, bath and cooking"
+          "consumption sensor": "Gas/Energy sensor entity with total consumption from startday and month",
+          "dhw consumption": "Gas/Energy consumption per month for domestic hot water",
+          "heatpump": "Heatpump/Electric heating (will use kWh instead of m3 as unit of measurement)"
         }
       }
     },
@@ -33,8 +34,9 @@
           "heating limit": "Heating temperature limit",
           "startday": "Startday for sum of total degree days",
           "startmonth": "Startmonth for sum of total degree days",
-          "gas sensor": "Gas sensor entity",
-          "gas use other": "Gas usage per month for shower, bath and cooking"
+          "consumption sensor": "Gas/Energy sensor entity with total consumption from startday and month",
+          "dhw consumption": "Gas/Energy consumption per month for domestic hot water",
+          "heatpump": "Heatpump/Electric heating (will use kWh instead of m3 as unit of measurement)"
         }
       }
     },
