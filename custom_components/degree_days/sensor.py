@@ -4,15 +4,30 @@ from homeassistant.helpers import update_coordinator
 from homeassistant.helpers.entity import StateType
 
 from . import DegreeDaysData
-from .const import DOMAIN, SENSOR_TYPES, DegreeDaysSensorEntityDescription
+from .const import (
+    DOMAIN,
+    GAS_SENSOR_TYPES,
+    HEATPUMP_SENSOR_TYPES,
+    SENSOR_TYPES,
+    DegreeDaysSensorEntityDescription
+)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Add degree days entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
+
     async_add_entities(
         DegreeDaysSensor(coordinator, description) for description in SENSOR_TYPES
     )
+    if coordinator.heatpump:
+        async_add_entities(
+            DegreeDaysSensor(coordinator, description) for description in HEATPUMP_SENSOR_TYPES
+        )
+    else:
+        async_add_entities(
+            DegreeDaysSensor(coordinator, description) for description in GAS_SENSOR_TYPES
+        )
 
 
 class DegreeDaysSensor(update_coordinator.CoordinatorEntity, SensorEntity):
