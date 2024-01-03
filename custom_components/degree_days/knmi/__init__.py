@@ -9,24 +9,33 @@ from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
 class KNMI(object):
     """KMNI datas"""
-    def __init__(self, startdate, station, T_indoor, T_heatinglimit, gas_usage, gas_other):
+    def __init__(self, startdate, station, T_indoor, T_heatinglimit, total_consumption, dhw_consumption, heatpump):
         self.startdate = startdate
         self.station = station
         self.T_indoor = T_indoor
         self.T_heatinglimit = T_heatinglimit
-        self.gas_usage = gas_usage
-        self.gas_other_per_day = gas_other * 12 / 365
+        self.total_consumption = total_consumption
+        self.dhw_consumption_per_day = dhw_consumption * 12 / 365
+        self.heatpump = heatpump
         data = self.get_degree_days()
 
         self.last_update = data["last_update"]
         self.total_degree_days_this_year = data["total_degree_days_this_year"]
         self.weighted_degree_days_year = data["weighted_degree_days_year"]
-        if self.gas_usage:
-            self.gas_per_weighted_degree_day = data["gas_per_weighted_degree_day"]
-            self.gas_prognose = data["gas_prognose"]
+        if self.heatpump:
+            if self.total_consumption:
+                self.ebergy_consumption_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
+                self.energy_consumption_prognose = data["consumption_prognose"]
+            else:
+                self.energy_consumption_per_weighted_degree_day = None
+                self.energy_consumption_prognose = None
         else:
-            self.gas_per_weighted_degree_day = None
-            self.gas_prognose = None
+            if self.total_consumption:
+                self.gas_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
+                self.gas_prognose = data["consumption_prognose"]
+            else:
+                self.gas_per_weighted_degree_day = None
+                self.gas_prognose = None
 
     def get_degree_days(self):
         """Calculate degree days."""
@@ -79,22 +88,22 @@ class KNMI(object):
         data["total_degree_days_this_year"] = DD
         data["weighted_degree_days_year"] = WDD
         last_update = str(df["YYYYMMDD"].iloc[-1])
-        number_of_days_gas = (datetime.strptime(enddate, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
+        number_of_days_consumption = (datetime.strptime(enddate, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
 
-        # calculate gas prognose
-        if self.gas_usage and number_of_days_gas > 0:
-            # estimate gas consumption at the end of KNMI data
+        # calculate prognose
+        if self.total_consumption and number_of_days_consumption > 0:
+            # estimate consumption at the end of KNMI data
             number_of_days_knmi = (datetime.strptime(last_update, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
 
-            gas_use_other = self.gas_other_per_day * number_of_days_gas
-            gas_consumption_total = self.gas_usage * number_of_days_knmi / number_of_days_gas
-            gas_consumption_heating = (self.gas_usage - gas_use_other) * number_of_days_knmi / number_of_days_gas
+            dhw_consumption_other = self.dhw_consumption_per_day * number_of_days_consumption
+            consumption_total = self.total_consumption * number_of_days_knmi / number_of_days_consumption
+            consumption_heating = (self.total_consumption - dhw_consumption_other) * number_of_days_knmi / number_of_days_consumption
 
-            gas_prognose = round(gas_consumption_total / WDD * (WDD + (WDD_average_total - WDD_average_cum)), 1)
-            gas_per_weighted_degree_day = round(gas_consumption_heating / WDD, 3)
+            consumption_prognose = round(consumption_total / WDD * (WDD + (WDD_average_total - WDD_average_cum)), 1)
+            consumption_per_weighted_degree_day = round(consumption_heating / WDD, 3)
 
-            data["gas_per_weighted_degree_day"] = gas_per_weighted_degree_day
-            data["gas_prognose"] = gas_prognose
+            data["consumption_per_weighted_degree_day"] = consumption_per_weighted_degree_day
+            data["consumption_prognose"] = consumption_prognose
 
         return data
 
