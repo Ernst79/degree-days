@@ -8,7 +8,7 @@ from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
 
 class KNMI(object):
-    """KMNI datas"""
+    """KMNI data"""
     def __init__(self, startdate, station, T_indoor, T_heatinglimit, total_consumption, dhw_consumption, heatpump):
         self.startdate = startdate
         self.station = station
