@@ -66,7 +66,7 @@ STATION_MAPPING = {
     'Lauwersoog': 277,
     'Leeuwarden': 270,
     'Lelystad': 269,
-    'Maastricht': 380, 
+    'Maastricht': 380,
     'Marknesse': 273,
     'Nieuw Beerta': 286,
     'Oosterschelde': 312,
