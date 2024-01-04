@@ -3,16 +3,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntityDescription,
-    SensorStateClass,
-)
-from homeassistant.const import (
-    UnitOfEnergy,
-    UnitOfTemperature,
-    UnitOfVolume,
-)
+from homeassistant.components.sensor import (SensorDeviceClass,
+                                             SensorEntityDescription,
+                                             SensorStateClass)
++from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfVolume
 from homeassistant.util import dt
 
 DOMAIN = "degree_days"
