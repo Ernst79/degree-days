@@ -1,13 +1,14 @@
 """Module to calculate the (weighted) degree days from KNMI data"""
 from datetime import datetime
 from io import StringIO
-import requests
+
 import pandas as pd
+import requests
 
 from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
 
-class KNMI(object):
+class KNMI:
     """KMNI data"""
     def __init__(self, startdate, station, T_indoor, T_heatinglimit, total_consumption, dhw_consumption, heatpump):
         self.startdate = startdate
