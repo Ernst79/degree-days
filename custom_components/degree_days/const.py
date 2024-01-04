@@ -9,8 +9,9 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
-    VOLUME_CUBIC_METERS,
-    TEMP_CELSIUS,
+    UnitOfEnergy,
+    UnitOfTemperature,
+    UnitOfVolume,
 )
 from homeassistant.util import dt
 
@@ -24,14 +25,18 @@ CONF_STARTDAY = "startday"
 CONF_STARTMONTH = "startmonth"
 CONF_GAS_SENSOR = "gas sensor"
 CONF_GAS_USE_OTHER = "gas use other"
+CONF_CONSUMPTION_SENSOR = "consumption sensor"
+CONF_DHW_CONSUMPTION = "dhw consumption"
+CONF_HEATPUMP = "heatpump"
 
 DEFAULT_HEATING_LIMIT = 18.0
 DEFAULT_INDOOR_TEMP = 18.0
 DEFAULT_WEATHER_STATION = "De Bilt"
 DEFAULT_STARTDAY = "01"
 DEFAULT_STARTMONTH = "January"
-DEFAULT_GAS_SENSOR = ""
-DEFAULT_GAS_USE_OTHER = 0
+DEFAULT_CONSUMPTION_SENSOR = ""
+DEFAULT_DHW_CONSUMPTION = 0
+DEFAULT_HEATPUMP = False
 
 # KNMI weather stations (NL).
 STATION_MAPPING = {
@@ -126,7 +131,7 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         key="total_degree_days_this_year",
         name="degree days this year",
         icon="mdi:thermometer",
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         device_class=None,
         state_class=SensorStateClass.TOTAL_INCREASING,
     ),
@@ -134,15 +139,19 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         key="weighted_degree_days_year",
         name="weighted degree days this year",
         icon="mdi:thermometer",
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         device_class=None,
         state_class=SensorStateClass.TOTAL,
     ),
+)
+
+
+GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
     DegreeDaysSensorEntityDescription(
         key="gas_per_weighted_degree_day",
         name="gas consumption per weighted degree day",
         icon="mdi:fire",
-        native_unit_of_measurement=VOLUME_CUBIC_METERS,
+        native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
         state_class=SensorStateClass.TOTAL,
     ),
@@ -150,8 +159,28 @@ SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         key="gas_prognose",
         name="gas prognose",
         icon="mdi:fire",
-        native_unit_of_measurement=VOLUME_CUBIC_METERS,
+        native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
+        state_class=SensorStateClass.TOTAL,
+    ),
+)
+
+
+HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
+    DegreeDaysSensorEntityDescription(
+        key="energy_consumption_per_weighted_degree_day",
+        name="energy consumption per weighted degree day",
+        icon="mdi:home-lightning-bolt",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+    ),
+    DegreeDaysSensorEntityDescription(
+        key="energy_consumption_prognose",
+        name="energy consumption prognose",
+        icon="mdi:home-lightning-bolt",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
     ),
 )
