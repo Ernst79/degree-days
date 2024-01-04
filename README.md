@@ -1,6 +1,6 @@
 # Degree-days integration
 
-Degree days integration for Home Assistant based on KNMI weather station data (the Netherlands) and your current gas consumpition this year. 
+Degree days integration for Home Assistant based on KNMI weather station data (the Netherlands) and your current gas consumption this year. 
 
 This integration will collect daily averaged temperatures of the last year from a KNMI weather station and will calculate the total number of (weighted) degree days this year (similar as is done on the [mindergas website](www.mindergas.nl)). Based on this information and input from your gas consumption so far this year, it will estimate the gas consumption for the entire year and will determine the gas consumption per weighted degree day, which can be used for comparison with other years or other houses.
 
