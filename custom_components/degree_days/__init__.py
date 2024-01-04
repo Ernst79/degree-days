@@ -1,36 +1,22 @@
 """Degree Days integration."""
-from datetime import timedelta
 import datetime
 import logging
-
-from .knmi import KNMI
-from requests.exceptions import HTTPError, Timeout
+from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import update_coordinator
+from requests.exceptions import HTTPError, Timeout
 
-from .const import (
-    CONF_HEATING_LIMIT,
-    CONF_INDOOR_TEMP,
-    CONF_WEATHER_STATION,
-    CONF_STARTDAY,
-    CONF_STARTMONTH,
-    CONF_CONSUMPTION_SENSOR,
-    CONF_DHW_CONSUMPTION,
-    CONF_HEATPUMP,
-    CONF_GAS_SENSOR,
-    CONF_GAS_USE_OTHER,
-    DEFAULT_HEATING_LIMIT,
-    DEFAULT_INDOOR_TEMP,
-    DEFAULT_WEATHER_STATION,
-    DEFAULT_STARTDAY,
-    DEFAULT_STARTMONTH,
-    DEFAULT_CONSUMPTION_SENSOR,
-    DEFAULT_DHW_CONSUMPTION,
-    DEFAULT_HEATPUMP,
-    DOMAIN
-)
+from .const import (CONF_CONSUMPTION_SENSOR, CONF_DHW_CONSUMPTION,
+                    CONF_GAS_SENSOR, CONF_GAS_USE_OTHER, CONF_HEATING_LIMIT,
+                    CONF_HEATPUMP, CONF_INDOOR_TEMP, CONF_STARTDAY,
+                    CONF_STARTMONTH, CONF_WEATHER_STATION,
+                    DEFAULT_CONSUMPTION_SENSOR, DEFAULT_DHW_CONSUMPTION,
+                    DEFAULT_HEATING_LIMIT, DEFAULT_HEATPUMP,
+                    DEFAULT_INDOOR_TEMP, DEFAULT_STARTDAY, DEFAULT_STARTMONTH,
+                    DEFAULT_WEATHER_STATION, DOMAIN)
+from .knmi import KNMI
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -132,9 +118,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                                                     "%Y%B%d").strftime("%Y%m%d")
 
     async def _async_update_data(self):
-        """Update the data from the KNMI device."""
-        
-        # Get consumption state
+        """Update the data from the KNMI device."""       
         try:
             self.total_consumption_sensor_state = self.hass.states.get(self.total_consumption_sensor)
             self.total_consumption = float(self.total_consumption_sensor_state.state)
