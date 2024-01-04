@@ -118,7 +118,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                                                     "%Y%B%d").strftime("%Y%m%d")
 
     async def _async_update_data(self):
-        """Update the data from the KNMI device."""       
+        """Update the data from the KNMI device."""
         try:
             self.total_consumption_sensor_state = self.hass.states.get(self.total_consumption_sensor)
             self.total_consumption = float(self.total_consumption_sensor_state.state)
