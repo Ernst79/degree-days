@@ -1,7 +1,5 @@
-   
 {
   "name": "Degree-Days integration",
-  "domains": "degree_days",
   "render_readme": true,
-  "homeassistant": "2021.10.0"
+  "homeassistant": "2023.12.0"
 }

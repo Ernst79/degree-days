@@ -1,8 +1,8 @@
 {
     "domain": "degree_days",
     "name": "Degree-Days",
-    "config_flow": true,
     "codeowners": ["@Ernst79", "@nelbs"],
+    "config_flow": true,
     "dependencies": [],
     "documentation": "https://www.home-assistant.io/integrations/degree_days",
     "iot_class": "cloud_polling",
@@ -10,4 +10,3 @@
     "requirements": [],
     "version": "1.0.1"
   }
-  
