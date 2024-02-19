@@ -24,19 +24,11 @@ class KNMI:
         self.total_degree_days_this_year = data["total_degree_days_this_year"]
         self.weighted_degree_days_year = data["weighted_degree_days_year"]
         if self.heatpump:
-            if self.total_consumption:
-                self.energy_consumption_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
-                self.energy_consumption_prognose = data["consumption_prognose"]
-            else:
-                self.energy_consumption_per_weighted_degree_day = None
-                self.energy_consumption_prognose = None
+            self.energy_consumption_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
+            self.energy_consumption_prognose = data["consumption_prognose"]
         else:
-            if self.total_consumption:
-                self.gas_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
-                self.gas_prognose = data["consumption_prognose"]
-            else:
-                self.gas_per_weighted_degree_day = None
-                self.gas_prognose = None
+            self.gas_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
+            self.gas_prognose = data["consumption_prognose"]
 
     def get_degree_days(self):
         """Calculate degree days."""
@@ -105,6 +97,9 @@ class KNMI:
 
             data["consumption_per_weighted_degree_day"] = consumption_per_weighted_degree_day
             data["consumption_prognose"] = consumption_prognose
+        else:
+            data["consumption_per_weighted_degree_day"] = None
+            data["consumption_prognose"] = None
 
         return data
 
