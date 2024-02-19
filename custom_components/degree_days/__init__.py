@@ -32,13 +32,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(update_listener))
     return True
 
+
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Update listener."""
     await hass.config_entries.async_reload(entry.entry_id)
 
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
 
 async def async_migrate_entry(hass, config_entry):
     """Migrate config entry to new version."""
@@ -81,7 +84,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                 CONF_STARTDAY: data.pop(CONF_STARTDAY, DEFAULT_STARTDAY),
                 CONF_STARTMONTH: data.pop(CONF_STARTMONTH, DEFAULT_STARTMONTH),
                 CONF_CONSUMPTION_SENSOR: data.pop(CONF_CONSUMPTION_SENSOR, DEFAULT_CONSUMPTION_SENSOR),
-                CONF_DHW_CONSUMPTION: data.pop(CONF_DHW_CONSUMPTION, DEFAULT_CONSUMPTION_USE_OTHER),
+                CONF_DHW_CONSUMPTION: data.pop(CONF_DHW_CONSUMPTION, DEFAULT_DHW_CONSUMPTION),
                 CONF_HEATPUMP: data.pop(CONF_HEATPUMP, DEFAULT_HEATPUMP),
             }
 
