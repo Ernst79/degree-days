@@ -25,10 +25,12 @@ class KNMI:
         self.weighted_degree_days_year = data["weighted_degree_days_year"]
         if self.heatpump:
             self.energy_consumption_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
-            self.energy_consumption_prognose = data["consumption_prognose"]
+            self.energy_consumption_prognose_total = data["consumption_prognose_total"]
+            self.energy_consumption_prognose_heating = data["consumption_prognose_heating"]
         else:
             self.gas_per_weighted_degree_day = data["consumption_per_weighted_degree_day"]
-            self.gas_prognose = data["consumption_prognose"]
+            self.gas_prognose_total = data["consumption_prognose_total"]
+            self.gas_prognose_heating = data["consumption_prognose_heating"]
 
     def get_degree_days(self):
         """Calculate degree days."""
@@ -89,18 +91,19 @@ class KNMI:
             number_of_days_knmi = (datetime.strptime(last_update, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
 
             dhw_consumption_other = self.dhw_consumption_per_day * number_of_days_consumption
-            consumption_total = self.total_consumption * number_of_days_knmi / number_of_days_consumption
             consumption_heating = (self.total_consumption - dhw_consumption_other) * number_of_days_knmi / number_of_days_consumption
 
-            consumption_prognose = round(consumption_total / WDD * (WDD + (WDD_average_total - WDD_average_cum)), 1)
+            consumption_prognose_heating = round(consumption_heating / WDD * (WDD + (WDD_average_total - WDD_average_cum)), 1)
+            consumption_prognose_total = round(consumption_prognose_heating + self.dhw_consumption_per_day * 365 , 1)
             consumption_per_weighted_degree_day = round(consumption_heating / WDD, 3)
 
             data["consumption_per_weighted_degree_day"] = consumption_per_weighted_degree_day
-            data["consumption_prognose"] = consumption_prognose
+            data["consumption_prognose_heating"] = consumption_prognose_heating
+            data["consumption_prognose_total"] = consumption_prognose_total
         else:
             data["consumption_per_weighted_degree_day"] = None
-            data["consumption_prognose"] = None
-
+            data["consumption_prognose_heating"] = None
+            data["consumption_prognose_total"] = None
         return data
 
     def calculate_DD(self, TG, WF):
