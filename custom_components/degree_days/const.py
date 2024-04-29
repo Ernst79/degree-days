@@ -157,6 +157,14 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.GAS,
         state_class=SensorStateClass.TOTAL,
     ),
+    DegreeDaysSensorEntityDescription(
+        key="gas_prognose_heating",
+        name="gas prognose heating",
+        icon="mdi:fire",
+        native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        device_class=SensorDeviceClass.GAS,
+        state_class=SensorStateClass.TOTAL,
+    ),
 )
 
 
