@@ -34,7 +34,6 @@ DEFAULT_HEATPUMP = False
 
 # KNMI weather stations (NL).
 STATION_MAPPING = {
-    'Arcen': 391,
     'Berkhout': 249,
     'Cabauw Mast': 348,
     'Cadzand ': 308,
@@ -52,6 +51,7 @@ STATION_MAPPING = {
     'Hoofdplaat': 311,
     'Hoogeveen': 279,
     'Hoorn Terschelling': 251,
+    'Horst': 392,
     'Houtribdijk': 258,
     'Hupsel': 283,
     'Huibertgat': 285,
