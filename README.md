@@ -20,12 +20,13 @@ You can add a gas or energy sensor to calculate the consumption per weighted deg
 ## How to install
 
 1. Make sure you have [hacs](https://hacs.xyz/) installed.
-2. In hacs, go to integrations and click on the blue button `Exlore and download repositories` in the bottom left corner, search for `Degree-days` and install it.
-3. Reboot HA.
-4. In HA go to Config -> Integrations. Add the Degree-days integration to HA.
-5. select your weather station and add your gas/heatpump sensor and check the other settings.
-6. click submit.
-7. In your lovelace dashboard, add a card with the degree days entities.
+2. In hacs, first add a custom repository, with type: integration and add the following link in the integration field: https://github.com/Ernst79/degree-days
+3. In hacs, go to integrations and click on the blue button `Exlore and download repositories` in the bottom left corner, search for `Degree-days` and install it.
+4. Reboot HA.
+5. In HA go to Config -> Integrations. Add the Degree-days integration to HA.
+6. select your weather station and add your gas/heatpump sensor and check the other settings.
+7. click submit.
+8. In your lovelace dashboard, add a card with the degree days entities.
 
 ## Options
 
