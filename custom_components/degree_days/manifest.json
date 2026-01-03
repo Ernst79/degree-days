@@ -4,7 +4,7 @@
     "codeowners": ["@Ernst79", "@nelbs"],
     "config_flow": true,
     "dependencies": [],
-    "documentation": "https://www.home-assistant.io/integrations/degree_days",
+    "documentation": "https://github.com/Ernst79/degree-days",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/Ernst79/degree-days/issues",
     "requirements": [],
