@@ -187,7 +187,7 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
     ),
     DegreeDaysSensorEntityDescription(
         key="energy_consumption_prognose_total",
-        name="energy consumption prognose heating",
+        name="energy consumption prognose total",
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
