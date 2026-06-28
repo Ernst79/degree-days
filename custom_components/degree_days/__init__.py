@@ -40,7 +40,10 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+    return unload_ok
 
 
 async def async_migrate_entry(hass, config_entry):
@@ -70,38 +73,67 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize the data object."""
+        self.config_entry = entry
         super().__init__(
-            hass, _LOGGER, name="Degree Days", update_interval=timedelta(seconds=600)
+            hass,
+            _LOGGER,
+            name="Degree Days",
+            config_entry=entry,
+            update_interval=timedelta(seconds=600),
         )
 
-        """Populate default options."""
-        if not self.config_entry.options:
-            data = dict(self.config_entry.data)
-            options = {
-                CONF_WEATHER_STATION: data.pop(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION),
-                CONF_INDOOR_TEMP: data.pop(CONF_INDOOR_TEMP, DEFAULT_INDOOR_TEMP),
-                CONF_HEATING_LIMIT: data.pop(CONF_HEATING_LIMIT, DEFAULT_HEATING_LIMIT),
-                CONF_STARTDAY: data.pop(CONF_STARTDAY, DEFAULT_STARTDAY),
-                CONF_STARTMONTH: data.pop(CONF_STARTMONTH, DEFAULT_STARTMONTH),
-                CONF_CONSUMPTION_SENSOR: data.pop(CONF_CONSUMPTION_SENSOR, DEFAULT_CONSUMPTION_SENSOR),
-                CONF_DHW_CONSUMPTION: data.pop(CONF_DHW_CONSUMPTION, DEFAULT_DHW_CONSUMPTION),
-                CONF_HEATPUMP: data.pop(CONF_HEATPUMP, DEFAULT_HEATPUMP),
-            }
+        data = dict(self.config_entry.data)
+        options = dict(self.config_entry.options)
+        normalized_options = {
+            CONF_WEATHER_STATION: options.get(
+                CONF_WEATHER_STATION,
+                data.pop(CONF_WEATHER_STATION, DEFAULT_WEATHER_STATION),
+            ),
+            CONF_INDOOR_TEMP: options.get(
+                CONF_INDOOR_TEMP,
+                data.pop(CONF_INDOOR_TEMP, DEFAULT_INDOOR_TEMP),
+            ),
+            CONF_HEATING_LIMIT: options.get(
+                CONF_HEATING_LIMIT,
+                data.pop(CONF_HEATING_LIMIT, DEFAULT_HEATING_LIMIT),
+            ),
+            CONF_STARTDAY: options.get(
+                CONF_STARTDAY,
+                data.pop(CONF_STARTDAY, DEFAULT_STARTDAY),
+            ),
+            CONF_STARTMONTH: options.get(
+                CONF_STARTMONTH,
+                data.pop(CONF_STARTMONTH, DEFAULT_STARTMONTH),
+            ),
+            CONF_CONSUMPTION_SENSOR: options.get(
+                CONF_CONSUMPTION_SENSOR,
+                data.pop(CONF_CONSUMPTION_SENSOR, DEFAULT_CONSUMPTION_SENSOR),
+            ),
+            CONF_DHW_CONSUMPTION: options.get(
+                CONF_DHW_CONSUMPTION,
+                data.pop(CONF_DHW_CONSUMPTION, DEFAULT_DHW_CONSUMPTION),
+            ),
+            CONF_HEATPUMP: options.get(
+                CONF_HEATPUMP,
+                data.pop(CONF_HEATPUMP, DEFAULT_HEATPUMP),
+            ),
+        }
 
+        if normalized_options != self.config_entry.options or data != self.config_entry.data:
             self.hass.config_entries.async_update_entry(
                 self.config_entry,
                 data=data,
-                options=options
+                options=normalized_options,
             )
 
-        self.weather_station = entry.options[CONF_WEATHER_STATION]
-        self.indoor_temp = entry.options[CONF_INDOOR_TEMP]
-        self.heating_limit = entry.options[CONF_HEATING_LIMIT]
-        self.start_day = entry.options[CONF_STARTDAY]
-        self.start_month = entry.options[CONF_STARTMONTH]
-        self.total_consumption_sensor = entry.options[CONF_CONSUMPTION_SENSOR]
-        self.dwh_consumption = entry.options[CONF_DHW_CONSUMPTION]
-        self.heatpump = entry.options[CONF_HEATPUMP]
+        self.weather_station = normalized_options[CONF_WEATHER_STATION]
+        self.indoor_temp = normalized_options[CONF_INDOOR_TEMP]
+        self.heating_limit = normalized_options[CONF_HEATING_LIMIT]
+        self.start_day = normalized_options[CONF_STARTDAY]
+        self.start_month = normalized_options[CONF_STARTMONTH]
+        self.total_consumption_sensor = normalized_options[CONF_CONSUMPTION_SENSOR]
+        self.dhw_consumption = normalized_options[CONF_DHW_CONSUMPTION]
+        self.heatpump = normalized_options[CONF_HEATPUMP]
         self.unique_id = entry.entry_id
         self.name = entry.title
 
@@ -125,7 +157,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         try:
             self.total_consumption_sensor_state = self.hass.states.get(self.total_consumption_sensor)
             self.total_consumption = float(self.total_consumption_sensor_state.state)
-        except AttributeError:
+        except (AttributeError, TypeError, ValueError):
             self.total_consumption = 0
         try:
             data = await self.hass.async_add_executor_job(
@@ -135,7 +167,7 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                 self.indoor_temp,
                 self.heating_limit,
                 self.total_consumption,
-                self.dwh_consumption,
+                self.dhw_consumption,
                 self.heatpump
             )
 

@@ -10,6 +10,7 @@ from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
 class KNMI:
     """KMNI data"""
+
     def __init__(self, startdate, station, T_indoor, T_heatinglimit, total_consumption, dhw_consumption, heatpump):
         self.startdate = startdate
         self.station = station
@@ -37,27 +38,42 @@ class KNMI:
         enddate = datetime.now().strftime("%Y%m%d")
 
         station_code = STATION_MAPPING[self.station]
-        year = datetime.strptime(self.startdate, '%Y%m%d').year
-        variables = ['TG']
+        startdate = datetime.strptime(self.startdate, "%Y%m%d")
+        year = startdate.year
+        variables = ["TG"]
         # Get data for the last 20 years
-        df = self.get_daily_data_df(self.startdate.replace(str(year), str(int(year) - 20), 1), enddate, [station_code],
-                               variables)
+        df = self.get_daily_data_df(
+            self.startdate.replace(str(year), str(int(year) - 20), 1),
+            enddate,
+            [station_code],
+            variables,
+        )
 
-        df = df.rename(columns={'   TG': 'TG'})
-        df['Date'] = pd.to_datetime(df['YYYYMMDD'], format='%Y%m%d')
-        df["TG"] = pd.to_numeric(df["TG"], errors='coerce', downcast="float")
+        if df.empty:
+            return self._empty_data()
+
+        df.columns = df.columns.str.strip()
+        if not {"YYYYMMDD", "TG"}.issubset(df.columns):
+            return self._empty_data()
+
+        df["Date"] = pd.to_datetime(df["YYYYMMDD"], format="%Y%m%d", errors="coerce")
+        df["TG"] = pd.to_numeric(df["TG"], errors="coerce", downcast="float")
+        df = df.dropna(subset=["Date", "TG"]).copy()
+
+        if df.empty:
+            return self._empty_data()
 
         # add day, month and year number
-        df['day'] = df['Date'].dt.dayofyear
-        df['month'] = df['Date'].dt.month
-        df['year'] = df['Date'].dt.year
+        df["day"] = df["Date"].dt.dayofyear
+        df["month"] = df["Date"].dt.month
+        df["year"] = df["Date"].dt.year
 
         # calculate mean of every yearday in range
-        df_average = df.groupby('day')['TG'].mean().reset_index(name="TG_average")
-        df = pd.merge(df, df_average, on=['day'], how='left')
+        df_average = df.groupby("day")["TG"].mean().reset_index(name="TG_average")
+        df = pd.merge(df, df_average, on=["day"], how="left")
 
         # add weight factor based on month
-        df['WF'] = df['month'].map(lambda value: WEIGHT_FACTOR[value])
+        df["WF"] = df["month"].map(lambda value: WEIGHT_FACTOR[value])
 
         # Calculate degree days
         df["DD"] = df.apply(lambda x: self.calculate_DD(x.TG, 1.0), axis=1)
@@ -70,12 +86,14 @@ class KNMI:
         DD = df[df.year == year].DD.sum()
 
         # get 1 year before startdate
-        startdate_offset_year = self.startdate.replace(str(year), str(int(year) - 1), 1)
+        startdate_offset_year = startdate.replace(year=year - 1)
 
         # calculate weighted degree year
-        WDD = df[df.Date >= self.startdate].WDD.sum()
-        WDD_average_total = df[df["Date"].between(startdate_offset_year, self.startdate)].WDD_average.sum()
-        WDD_average_cum = df[df.Date >= self.startdate].WDD_average.sum()
+        WDD = df[df["Date"] >= startdate].WDD.sum()
+        WDD_average_total = df[
+            df["Date"].between(startdate_offset_year, startdate)
+        ].WDD_average.sum()
+        WDD_average_cum = df[df["Date"] >= startdate].WDD_average.sum()
 
         data = {}
 
@@ -83,18 +101,32 @@ class KNMI:
         data["total_degree_days_this_year"] = DD
         data["weighted_degree_days_year"] = WDD
         last_update = str(df["YYYYMMDD"].iloc[-1])
-        number_of_days_consumption = (datetime.strptime(enddate, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
+        number_of_days_consumption = (datetime.strptime(enddate, "%Y%m%d") - startdate).days
 
         # calculate prognose
-        if self.total_consumption and number_of_days_consumption > 0:
+        if self.total_consumption and number_of_days_consumption > 0 and WDD > 0:
             # estimate consumption at the end of KNMI data
-            number_of_days_knmi = (datetime.strptime(last_update, '%Y%m%d') - datetime.strptime(self.startdate, '%Y%m%d')).days
+            number_of_days_knmi = (
+                datetime.strptime(last_update, "%Y%m%d") - startdate
+            ).days
 
             dhw_consumption_other = self.dhw_consumption_per_day * number_of_days_consumption
-            consumption_heating = (self.total_consumption - dhw_consumption_other) * number_of_days_knmi / number_of_days_consumption
+            consumption_heating = (
+                (self.total_consumption - dhw_consumption_other)
+                * number_of_days_knmi
+                / number_of_days_consumption
+            )
 
-            consumption_prognose_heating = round(consumption_heating / WDD * (WDD + (WDD_average_total - WDD_average_cum)), 1)
-            consumption_prognose_total = round(consumption_prognose_heating + self.dhw_consumption_per_day * 365 , 1)
+            consumption_prognose_heating = round(
+                consumption_heating
+                / WDD
+                * (WDD + (WDD_average_total - WDD_average_cum)),
+                1,
+            )
+            consumption_prognose_total = round(
+                consumption_prognose_heating + self.dhw_consumption_per_day * 365,
+                1,
+            )
             consumption_per_weighted_degree_day = round(consumption_heating / WDD, 3)
 
             data["consumption_per_weighted_degree_day"] = consumption_per_weighted_degree_day
@@ -112,6 +144,17 @@ class KNMI:
             return 0
         else:
             return (max(self.T_indoor - TG / 10, 0) * WF)
+
+    def _empty_data(self):
+        """Return an unavailable dataset when KNMI has no usable rows."""
+        return {
+            "last_update": None,
+            "total_degree_days_this_year": None,
+            "weighted_degree_days_year": None,
+            "consumption_per_weighted_degree_day": None,
+            "consumption_prognose_heating": None,
+            "consumption_prognose_total": None,
+        }
 
     def get_daily_data_df(self, startdate, enddate, stations, variables):
         """Request and parse data from knmi api.
@@ -161,7 +204,8 @@ class KNMI:
         params = params + '&end=' + end
         params = self.add_list_items_to_params(params, 'stns', stations)
         params = self.add_list_items_to_params(params, 'vars', variables)
-        r = requests.post(url=url, data=params)
+        r = requests.post(url=url, data=params, timeout=30)
+        r.raise_for_status()
         return r.text
 
     def add_list_items_to_params(self, params, name, variables):
@@ -202,13 +246,24 @@ class KNMI:
         DataFrame
             Containing data returned by knmi api
         """
-        # Count and drop the # lines, except last containing column names
-        count = 0
-        for i in range(0, len(response_text)):
-            if (response_text[i] == '#'):
-                count = count + 1
-        r = response_text.split("\n", count - 1)[count - 1]
-        # drop '# '
-        r = r[2:]
-        df = pd.read_csv(StringIO(r))
-        return df
+        header_line = None
+        data_lines = []
+
+        for raw_line in response_text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+
+            if line.startswith("#"):
+                candidate = line.lstrip("#").strip()
+                if "," in candidate:
+                    header_line = candidate
+                continue
+
+            data_lines.append(line)
+
+        if header_line is None:
+            return pd.DataFrame()
+
+        csv_text = "\n".join([header_line, *data_lines])
+        return pd.read_csv(StringIO(csv_text), skipinitialspace=True)
