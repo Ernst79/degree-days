@@ -1,11 +1,15 @@
 """Module to calculate the (weighted) degree days from KNMI data"""
 from datetime import datetime
 from io import StringIO
+import logging
 
 import pandas as pd
 import requests
 
 from ..const import STATION_MAPPING, WEIGHT_FACTOR
+
+_LOGGER = logging.getLogger(__name__)
+REFERENCE_FALLBACK_STATION = "De Bilt"
 
 
 class KNMI:
@@ -37,40 +41,51 @@ class KNMI:
         """Calculate degree days."""
         enddate = datetime.now().strftime("%Y%m%d")
 
-        station_code = STATION_MAPPING[self.station]
         startdate = datetime.strptime(self.startdate, "%Y%m%d")
         year = startdate.year
+        startdate_offset_year = startdate.replace(year=year - 1)
         variables = ["TG"]
-        # Get data for the last 20 years
-        df = self.get_daily_data_df(
-            self.startdate.replace(str(year), str(int(year) - 20), 1),
-            enddate,
-            [station_code],
-            variables,
-        )
+        history_startdate = self.startdate.replace(str(year), str(int(year) - 20), 1)
+        df = self._get_station_df(self.station, history_startdate, enddate, variables)
 
         if df.empty:
-            return self._empty_data()
-
-        df.columns = df.columns.str.strip()
-        if not {"YYYYMMDD", "TG"}.issubset(df.columns):
-            return self._empty_data()
-
-        df["Date"] = pd.to_datetime(df["YYYYMMDD"], format="%Y%m%d", errors="coerce")
-        df["TG"] = pd.to_numeric(df["TG"], errors="coerce", downcast="float")
-        df = df.dropna(subset=["Date", "TG"]).copy()
-
-        if df.empty:
-            return self._empty_data()
+            if self.station == REFERENCE_FALLBACK_STATION:
+                return self._empty_data()
+            _LOGGER.warning(
+                "KNMI station %s returned no usable data for %s through %s. "
+                "Falling back to %s for all degree day calculations.",
+                self.station,
+                history_startdate,
+                enddate,
+                REFERENCE_FALLBACK_STATION,
+            )
+            df = self._get_station_df(
+                REFERENCE_FALLBACK_STATION,
+                history_startdate,
+                enddate,
+                variables,
+            )
+            if df.empty:
+                return self._empty_data()
 
         # add day, month and year number
         df["day"] = df["Date"].dt.dayofyear
         df["month"] = df["Date"].dt.month
         df["year"] = df["Date"].dt.year
 
-        # calculate mean of every yearday in range
-        df_average = df.groupby("day")["TG"].mean().reset_index(name="TG_average")
-        df = pd.merge(df, df_average, on=["day"], how="left")
+        reference_station = self._get_reference_station_name(df, startdate_offset_year, startdate)
+        reference_df = (
+            df
+            if reference_station == self.station
+            else self._get_station_df(reference_station, history_startdate, enddate, variables)
+        )
+        if reference_df.empty:
+            _LOGGER.warning(
+                "Reference station %s returned no usable data. Falling back to %s averages for prognosis.",
+                reference_station,
+                self.station,
+            )
+            reference_df = df
 
         # add weight factor based on month
         df["WF"] = df["month"].map(lambda value: WEIGHT_FACTOR[value])
@@ -79,21 +94,24 @@ class KNMI:
         df["DD"] = df.apply(lambda x: self.calculate_DD(x.TG, 1.0), axis=1)
         # Calculate weighted degree days
         df["WDD"] = df.apply(lambda x: self.calculate_DD(x.TG, x.WF), axis=1)
-        # Calculate 20 year average weighted degree days
-        df["WDD_average"] = df.apply(lambda x: self.calculate_DD(x.TG_average, x.WF), axis=1)
 
         # calculate degree year
         DD = df[df.year == year].DD.sum()
 
-        # get 1 year before startdate
-        startdate_offset_year = startdate.replace(year=year - 1)
-
         # calculate weighted degree year
         WDD = df[df["Date"] >= startdate].WDD.sum()
-        WDD_average_total = df[
-            df["Date"].between(startdate_offset_year, startdate)
-        ].WDD_average.sum()
-        WDD_average_cum = df[df["Date"] >= startdate].WDD_average.sum()
+        reference_tg_by_day = reference_df.groupby("day")["TG"].mean().to_dict()
+        last_update_dt = df["Date"].max().to_pydatetime()
+        WDD_average_total = self._sum_average_wdd_for_period(
+            reference_tg_by_day,
+            startdate_offset_year,
+            startdate,
+        )
+        WDD_average_cum = self._sum_average_wdd_for_period(
+            reference_tg_by_day,
+            startdate,
+            last_update_dt,
+        )
 
         data = {}
 
@@ -137,6 +155,63 @@ class KNMI:
             data["consumption_prognose_heating"] = None
             data["consumption_prognose_total"] = None
         return data
+
+    def _get_reference_station_name(self, df, startdate_offset_year, startdate):
+        """Pick a station with enough history to build prognosis reference averages."""
+        reference_period = df[df["Date"].between(startdate_offset_year, startdate)]
+        expected_days = (startdate - startdate_offset_year).days + 1
+        available_days = reference_period["Date"].nunique()
+        minimum_days = min(expected_days, 300)
+
+        if available_days >= minimum_days:
+            return self.station
+
+        _LOGGER.warning(
+            "KNMI station %s has only %s historical day(s) for the prognosis "
+            "reference period %s through %s. Falling back to %s for reference averages.",
+            self.station,
+            available_days,
+            startdate_offset_year.strftime("%Y-%m-%d"),
+            startdate.strftime("%Y-%m-%d"),
+            REFERENCE_FALLBACK_STATION,
+        )
+        return REFERENCE_FALLBACK_STATION
+
+    def _get_station_df(self, station_name, startdate, enddate, variables):
+        """Load and normalize KNMI day data for one station."""
+        station_code = STATION_MAPPING[station_name]
+        df = self.get_daily_data_df(startdate, enddate, [station_code], variables)
+        if df.empty:
+            return pd.DataFrame()
+
+        df.columns = df.columns.str.strip()
+        if not {"YYYYMMDD", "TG"}.issubset(df.columns):
+            return pd.DataFrame()
+
+        df["Date"] = pd.to_datetime(df["YYYYMMDD"], format="%Y%m%d", errors="coerce")
+        df["TG"] = pd.to_numeric(df["TG"], errors="coerce", downcast="float")
+        df = df.dropna(subset=["Date", "TG"]).copy()
+        if df.empty:
+            return pd.DataFrame()
+
+        df["day"] = df["Date"].dt.dayofyear
+        return df
+
+    def _sum_average_wdd_for_period(self, reference_tg_by_day, startdate, enddate):
+        """Sum average weighted degree days over a full calendar period."""
+        if enddate < startdate:
+            return 0
+
+        total = 0
+        for current_date in pd.date_range(start=startdate, end=enddate, freq="D"):
+            tg_average = reference_tg_by_day.get(current_date.dayofyear)
+            if tg_average is None:
+                continue
+            total += self.calculate_DD(
+                tg_average,
+                WEIGHT_FACTOR[current_date.month],
+            )
+        return total
 
     def calculate_DD(self, TG, WF):
         """Calculate Weighted Degree Days"""
