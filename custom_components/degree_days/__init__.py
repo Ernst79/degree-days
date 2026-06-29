@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers import update_coordinator
 from requests.exceptions import HTTPError, Timeout
 
@@ -20,7 +21,7 @@ from .knmi import KNMI
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "button"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -28,6 +29,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = DegreeDaysData(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    if coordinator.total_consumption_sensor:
+        entry.async_on_unload(
+            async_track_state_change_event(
+                hass,
+                [coordinator.total_consumption_sensor],
+                coordinator.async_handle_consumption_sensor_change,
+            )
+        )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(update_listener))
     return True
@@ -180,3 +189,13 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
         )
 
         return data
+
+    async def async_handle_consumption_sensor_change(self, event) -> None:
+        """Refresh derived sensors when the source consumption sensor updates."""
+        old_state = event.data.get("old_state")
+        new_state = event.data.get("new_state")
+
+        if new_state is None or old_state == new_state:
+            return
+
+        await self.async_request_refresh()
