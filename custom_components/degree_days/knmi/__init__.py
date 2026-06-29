@@ -10,12 +10,24 @@ from ..const import STATION_MAPPING, WEIGHT_FACTOR
 
 _LOGGER = logging.getLogger(__name__)
 REFERENCE_FALLBACK_STATION = "De Bilt"
+_WARNED_FALLBACK_KEYS = set()
+_WARNED_NO_DATA_KEYS = set()
 
 
 class KNMI:
     """KMNI data"""
 
-    def __init__(self, startdate, station, T_indoor, T_heatinglimit, total_consumption, dhw_consumption, heatpump):
+    def __init__(
+        self,
+        startdate,
+        station,
+        T_indoor,
+        T_heatinglimit,
+        total_consumption,
+        dhw_consumption,
+        heatpump,
+        log_key=None,
+    ):
         self.startdate = startdate
         self.station = station
         self.T_indoor = T_indoor
@@ -23,6 +35,7 @@ class KNMI:
         self.total_consumption = total_consumption
         self.dhw_consumption_per_day = dhw_consumption * 12 / 365
         self.heatpump = heatpump
+        self.log_key = log_key or station
         data = self.get_degree_days()
 
         self.last_update = data["last_update"]
@@ -51,14 +64,7 @@ class KNMI:
         if df.empty:
             if self.station == REFERENCE_FALLBACK_STATION:
                 return self._empty_data()
-            _LOGGER.warning(
-                "KNMI station %s returned no usable data for %s through %s. "
-                "Falling back to %s for all degree day calculations.",
-                self.station,
-                history_startdate,
-                enddate,
-                REFERENCE_FALLBACK_STATION,
-            )
+            self._log_no_data_fallback_once(history_startdate, enddate)
             df = self._get_station_df(
                 REFERENCE_FALLBACK_STATION,
                 history_startdate,
@@ -166,14 +172,10 @@ class KNMI:
         if available_days >= minimum_days:
             return self.station
 
-        _LOGGER.warning(
-            "KNMI station %s has only %s historical day(s) for the prognosis "
-            "reference period %s through %s. Falling back to %s for reference averages.",
-            self.station,
+        self._log_reference_fallback_once(
             available_days,
-            startdate_offset_year.strftime("%Y-%m-%d"),
-            startdate.strftime("%Y-%m-%d"),
-            REFERENCE_FALLBACK_STATION,
+            startdate_offset_year,
+            startdate,
         )
         return REFERENCE_FALLBACK_STATION
 
@@ -212,6 +214,45 @@ class KNMI:
                 WEIGHT_FACTOR[current_date.month],
             )
         return total
+
+    def _log_no_data_fallback_once(self, history_startdate, enddate):
+        """Warn once per runtime when the selected station has no usable data."""
+        warning_key = (self.log_key, "no_data", self.station, history_startdate, enddate)
+        if warning_key in _WARNED_NO_DATA_KEYS:
+            return
+
+        _WARNED_NO_DATA_KEYS.add(warning_key)
+        _LOGGER.warning(
+            "KNMI station %s returned no usable data for %s through %s. "
+            "Falling back to %s for all degree day calculations.",
+            self.station,
+            history_startdate,
+            enddate,
+            REFERENCE_FALLBACK_STATION,
+        )
+
+    def _log_reference_fallback_once(self, available_days, startdate_offset_year, startdate):
+        """Warn once per runtime when fallback reference history is needed."""
+        warning_key = (
+            self.log_key,
+            "reference_fallback",
+            self.station,
+            startdate_offset_year.strftime("%Y%m%d"),
+            startdate.strftime("%Y%m%d"),
+        )
+        if warning_key in _WARNED_FALLBACK_KEYS:
+            return
+
+        _WARNED_FALLBACK_KEYS.add(warning_key)
+        _LOGGER.warning(
+            "KNMI station %s has only %s historical day(s) for the prognosis "
+            "reference period %s through %s. Falling back to %s for reference averages.",
+            self.station,
+            available_days,
+            startdate_offset_year.strftime("%Y-%m-%d"),
+            startdate.strftime("%Y-%m-%d"),
+            REFERENCE_FALLBACK_STATION,
+        )
 
     def calculate_DD(self, TG, WF):
         """Calculate Weighted Degree Days"""

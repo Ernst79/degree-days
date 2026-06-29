@@ -177,7 +177,8 @@ class DegreeDaysData(update_coordinator.DataUpdateCoordinator):
                 self.heating_limit,
                 self.total_consumption,
                 self.dhw_consumption,
-                self.heatpump
+                self.heatpump,
+                self.unique_id,
             )
 
         except (OSError, Timeout, HTTPError) as err:
