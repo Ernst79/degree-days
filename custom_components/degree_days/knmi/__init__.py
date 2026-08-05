@@ -12,6 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 REFERENCE_FALLBACK_STATION = "De Bilt"
 _WARNED_FALLBACK_KEYS = set()
 _WARNED_NO_DATA_KEYS = set()
+_WARNED_ZERO_WDD_KEYS = set()
 
 
 class KNMI:
@@ -128,7 +129,7 @@ class KNMI:
         number_of_days_consumption = (datetime.strptime(enddate, "%Y%m%d") - startdate).days
 
         # calculate prognose
-        if self.total_consumption and number_of_days_consumption > 0 and WDD > 0:
+        if self.total_consumption and number_of_days_consumption > 0:
             # estimate consumption at the end of KNMI data
             number_of_days_knmi = (
                 datetime.strptime(last_update, "%Y%m%d") - startdate
@@ -140,18 +141,23 @@ class KNMI:
                 * number_of_days_knmi
                 / number_of_days_consumption
             )
-
-            consumption_prognose_heating = round(
-                consumption_heating
-                / WDD
-                * (WDD + (WDD_average_total - WDD_average_cum)),
-                1,
-            )
-            consumption_prognose_total = round(
-                consumption_prognose_heating + self.dhw_consumption_per_day * 365,
-                1,
-            )
-            consumption_per_weighted_degree_day = round(consumption_heating / WDD, 3)
+            if WDD > 0:
+                consumption_prognose_heating = round(
+                    consumption_heating
+                    / WDD
+                    * (WDD + (WDD_average_total - WDD_average_cum)),
+                    1,
+                )
+                consumption_prognose_total = round(
+                    consumption_prognose_heating + self.dhw_consumption_per_day * 365,
+                    1,
+                )
+                consumption_per_weighted_degree_day = round(consumption_heating / WDD, 3)
+            else:
+                self._log_zero_wdd_fallback_once(startdate, last_update_dt)
+                consumption_prognose_heating = 0.0
+                consumption_prognose_total = round(self.dhw_consumption_per_day * 365, 1)
+                consumption_per_weighted_degree_day = 0.0
 
             data["consumption_per_weighted_degree_day"] = consumption_per_weighted_degree_day
             data["consumption_prognose_heating"] = consumption_prognose_heating
@@ -252,6 +258,25 @@ class KNMI:
             startdate_offset_year.strftime("%Y-%m-%d"),
             startdate.strftime("%Y-%m-%d"),
             REFERENCE_FALLBACK_STATION,
+        )
+
+    def _log_zero_wdd_fallback_once(self, startdate, last_update_dt):
+        """Inform once per runtime when prognosis falls back to base load only."""
+        warning_key = (
+            self.log_key,
+            "zero_wdd_fallback",
+            startdate.strftime("%Y%m%d"),
+        )
+        if warning_key in _WARNED_ZERO_WDD_KEYS:
+            return
+
+        _WARNED_ZERO_WDD_KEYS.add(warning_key)
+        _LOGGER.info(
+            "Weighted degree days are still zero for contract year starting %s "
+            "through %s. Using domestic hot water only fallback prognosis until "
+            "the first heating degree day is recorded.",
+            startdate.strftime("%Y-%m-%d"),
+            last_update_dt.strftime("%Y-%m-%d"),
         )
 
     def calculate_DD(self, TG, WF):
