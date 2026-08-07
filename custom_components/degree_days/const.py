@@ -147,7 +147,7 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:fire",
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
         key="gas_prognose_total",
@@ -155,7 +155,7 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:fire",
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
         key="gas_prognose_heating",
@@ -163,7 +163,7 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:fire",
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
 )
 
@@ -175,7 +175,7 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
         key="energy_consumption_prognose_heating",
@@ -183,7 +183,7 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
         key="energy_consumption_prognose_total",
@@ -191,6 +191,6 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
 )

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.3-beta.7
+
+- Restore `measurement` state class for forecast and ratio sensors so Home Assistant long-term statistics and repair warnings behave correctly.
+
 ## 1.3.3-beta.6
 
 - Prevent a division-by-zero warning when the contract year starts in summer and weighted degree days are still zero.
