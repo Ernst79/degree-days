@@ -146,7 +146,7 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         name="gas consumption per weighted degree day",
         icon="mdi:fire",
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
-        device_class=SensorDeviceClass.GAS,
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
@@ -154,7 +154,7 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         name="gas prognose total",
         icon="mdi:fire",
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
-        device_class=SensorDeviceClass.GAS,
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
@@ -162,7 +162,7 @@ GAS_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         name="gas prognose heating",
         icon="mdi:fire",
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
-        device_class=SensorDeviceClass.GAS,
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
     ),
 )
@@ -174,7 +174,7 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         name="energy consumption per weighted degree day",
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        device_class=SensorDeviceClass.ENERGY,
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
@@ -182,7 +182,7 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         name="energy consumption prognose heating",
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        device_class=SensorDeviceClass.ENERGY,
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     DegreeDaysSensorEntityDescription(
@@ -190,7 +190,7 @@ HEATPUMP_SENSOR_TYPES: tuple[DegreeDaysSensorEntityDescription, ...] = (
         name="energy consumption prognose total",
         icon="mdi:home-lightning-bolt",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        device_class=SensorDeviceClass.ENERGY,
+        device_class=None,
         state_class=SensorStateClass.MEASUREMENT,
     ),
 )
